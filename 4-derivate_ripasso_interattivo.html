@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ripasso Derivate - Schede Interattive</title>
+
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\(', '\)']],
+        displayMath: [['$$', '$$'], ['\[', '\]']]
+      },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+  <style>
+    :root{
+      --bg:#f4f7fb;
+      --card:#ffffff;
+      --ink:#1f2d3d;
+      --muted:#5f6f82;
+      --primary:#2f6fab;
+      --primary-2:#e9f2fb;
+      --accent:#dfeaf5;
+      --ok:#dff3e4;
+      --warn:#fff4d6;
+      --shadow:0 10px 24px rgba(27, 49, 72, .10);
+      --radius:18px;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0; font-family:Arial, Helvetica, sans-serif; background:var(--bg); color:var(--ink);
+      line-height:1.5;
+    }
+    header{
+      background:linear-gradient(135deg,#2f6fab,#5ea0d6);
+      color:white; padding:28px 18px 22px;
+      box-shadow:var(--shadow);
+      position:sticky; top:0; z-index:20;
+    }
+    header h1{margin:0 0 8px; font-size:clamp(1.4rem,2.8vw,2.2rem)}
+    header p{margin:0; opacity:.95}
+    .tabs{
+      display:flex; flex-wrap:wrap; gap:8px; margin-top:16px;
+    }
+    .tab-btn{
+      border:none; background:rgba(255,255,255,.18); color:#fff; padding:10px 14px; border-radius:999px;
+      cursor:pointer; font-weight:700; transition:.2s transform,.2s background;
+    }
+    .tab-btn:hover,.tab-btn.active{background:#fff; color:var(--primary); transform:translateY(-1px)}
+    main{max-width:1200px; margin:24px auto; padding:0 16px 40px}
+    .tab{display:none}
+    .tab.active{display:block}
+    .grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(290px,1fr)); gap:16px}
+    .card{
+      background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); padding:18px;
+    }
+    .card h2,.card h3{margin-top:0}
+    .exercise-title{
+      display:flex; align-items:center; gap:10px; margin-bottom:8px;
+      font-size:1.08rem;
+    }
+    .badge{
+      min-width:34px; height:34px; border-radius:10px; display:inline-flex; align-items:center; justify-content:center;
+      background:var(--primary); color:#fff; font-weight:700;
+    }
+    .formula{font-size:1.1rem; margin:.4rem 0 .9rem}
+    .actions{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:10px}
+    .btn{
+      border:none; border-radius:10px; padding:9px 12px; cursor:pointer; font-weight:700;
+      background:var(--primary-2); color:var(--primary);
+    }
+    .btn:hover{filter:brightness(.98)}
+    .reveal{display:none; padding:12px; margin-top:8px; border-radius:12px; background:#f8fbfe; border:1px solid #d8e7f6}
+    .reveal.open{display:block}
+    .hint{background:var(--warn); border-color:#f3ddb0}
+    .theory{background:#eef7ef; border-color:#cfe8d4}
+    .solution{background:#f7f9fc}
+    table{width:100%; border-collapse:collapse; margin:10px 0}
+    th,td{border:1px solid #d9e3ef; padding:10px; vertical-align:top}
+    th{background:#edf4fb}
+    .small{font-size:.95rem; color:var(--muted)}
+    .pill{display:inline-block; padding:6px 10px; border-radius:999px; background:#eef5fb; color:var(--primary); font-weight:700; margin:4px 6px 4px 0}
+    details{background:#f9fbfe; border-radius:12px; padding:10px 12px; margin:10px 0; border:1px solid #dde8f3}
+    details summary{cursor:pointer; font-weight:700}
+    .test-box{display:grid; gap:16px}
+    .question{padding:16px; border:1px solid #d8e4f0; border-radius:14px; background:#fff}
+    input[type="text"], select{
+      width:min(420px,100%); padding:10px 12px; border-radius:10px; border:1px solid #c8d8e8; font-size:1rem;
+    }
+    .score{
+      margin-top:18px; padding:16px; border-radius:14px; background:#eef7ef; border:1px solid #cfe8d4; font-weight:700;
+    }
+    .flash-panel{position:relative; overflow:hidden; background:linear-gradient(135deg,#fff7fb 0%,#f6fbff 55%,#f5fff7 100%)}
+    .flash-panel::before,.flash-panel::after{content:""; position:absolute; border-radius:50%; filter:blur(2px); opacity:.5; pointer-events:none}
+    .flash-panel::before{width:170px; height:170px; background:radial-gradient(circle,#ffd6e7 0%,transparent 70%); top:-55px; right:-35px; animation:floatBlob 8s ease-in-out infinite}
+    .flash-panel::after{width:140px; height:140px; background:radial-gradient(circle,#d9f0ff 0%,transparent 70%); bottom:-40px; left:-30px; animation:floatBlob 10s ease-in-out infinite reverse}
+    .flash-toolbar{display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin:14px 0 6px}
+    .flash-badge{display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:999px; background:#fff; border:1px solid #f4d7e8; box-shadow:0 8px 20px rgba(191,112,151,.12); font-weight:700; color:#8b4a6d}
+    .flash-wrap{display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:18px; margin-top:18px}
+    .flashcard{perspective:1400px; min-height:210px; cursor:pointer; transform:translateY(0); animation:cardFloat 4.8s ease-in-out infinite}
+    .flashcard:nth-child(3n){animation-duration:5.8s}
+    .flashcard:nth-child(4n){animation-duration:6.4s}
+    .flashcard:hover{transform:translateY(-4px) rotate(-1deg)}
+    .flash-inner{position:relative; width:100%; height:100%; min-height:210px; transition:transform .75s cubic-bezier(.2,.75,.25,1); transform-style:preserve-3d}
+    .flashcard.flipped .flash-inner{transform:rotateY(180deg)}
+    .flash-face{position:absolute; inset:0; backface-visibility:hidden; border-radius:24px; box-shadow:0 18px 36px rgba(30,41,59,.14); padding:20px 18px 18px; display:flex; flex-direction:column; justify-content:center; text-align:center; border:1px solid rgba(255,255,255,.65); overflow:hidden}
+    .flash-face::before{content:""; position:absolute; inset:0; background:linear-gradient(135deg,rgba(255,255,255,.78),rgba(255,255,255,.28)); pointer-events:none}
+    .flash-face > *{position:relative; z-index:1}
+    .flash-front{background:linear-gradient(135deg,#fff1f7 0%,#fffef5 100%)}
+    .flash-back{transform:rotateY(180deg); background:linear-gradient(135deg,#eef7ff 0%,#f0fff4 100%); font-weight:600}
+    .flash-mini{font-size:.82rem; text-transform:uppercase; letter-spacing:.08em; color:#8d5976; margin-bottom:10px}
+    .flash-question{font-size:1.05rem; font-weight:800; line-height:1.35; color:#243447}
+    .flash-answer{font-size:1rem; line-height:1.4; color:#203246}
+    .flash-emoji{font-size:1.35rem; margin-bottom:10px}
+    @keyframes cardFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+    @keyframes floatBlob{0%,100%{transform:translateY(0) translateX(0)}50%{transform:translateY(10px) translateX(-8px)}}
+    .top-link{
+      position:fixed; right:18px; bottom:18px; background:var(--primary); color:#fff; border:none; border-radius:999px;
+      width:54px; height:54px; box-shadow:var(--shadow); cursor:pointer; font-size:1.1rem;
+    }
+    .legend{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px}
+    .legend span{background:#fff; padding:8px 10px; border-radius:999px; box-shadow:var(--shadow); font-size:.92rem}
+    @media (max-width:640px){
+      header{position:static}
+      .actions{flex-direction:column}
+      .btn{width:100%}
+    }
+
+    .tab-tools{display:flex; gap:10px; flex-wrap:wrap; margin-top:12px}
+    .test-area{display:none; margin-top:14px; padding-top:12px; border-top:1px dashed var(--border)}
+    .test-mode .test-area{display:block}
+    .test-mode .actions, .test-mode .reveal{display:none}
+    .test-input, .test-select{width:100%; padding:10px 12px; border-radius:12px; border:1px solid var(--border); background:#fff; font-size:1rem}
+    .test-score{margin-top:16px; padding:14px; border-radius:14px; background:#f8fafc; border:1px solid var(--border)}
+
+  </style>
+</head>
+<body>
+<header id="top">
+  <h1>Derivate - Ripasso interattivo</h1>
+  <p>Schede per tipologia, svolgimenti guidati, suggerimenti, teoria, modalità test e flashcard.</p>
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="tab-base">Base</button>
+    <button class="tab-btn" data-tab="tab-composte">Composte</button>
+    <button class="tab-btn" data-tab="tab-inverse">Inverse</button>
+    <button class="tab-btn" data-tab="tab-derivabilita">Derivabilità</button>
+    <button class="tab-btn" data-tab="tab-teoria">Teoria</button>
+    <button class="tab-btn" data-tab="tab-test">Modalità test</button>
+    <button class="tab-btn" data-tab="tab-flash">Flashcard</button>
+  </div>
+</header>
+
+<main>
+  <section id="tab-base" class="tab active">
+    <div class="card">
+      <h2>Tipologia 1 - Calcolo di derivate: regole di base e operazioni tra funzioni</h2>
+      <p class="small">Qui trovi potenze, polinomi, prodotti, quozienti, radicali, logaritmi ed esponenziali.</p>
+      <div class="tab-tools"><button class="btn" onclick="toggleTabTest('tab-base')">Attiva/disattiva modalità test nella scheda</button><button class="btn secondary" onclick="gradeTabTest('tab-base')">Correggi la scheda</button></div><div id="score-tab-base" class="test-score" style="display:none"></div>
+    </div>
+    <div class="grid">
+      <div class="card exercise">
+        <div class="exercise-title"><span class="badge">1</span><strong>$y=\frac14 x^4+\frac13 x^3-\frac12 x^2+\frac34$</strong></div>
+        <div class="actions">
+          <button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button>
+          <button class="btn" onclick="toggleBox(this,'solution')">Svolgimento</button>
+          <button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button>
+        </div>
+        <div class="reveal hint">Deriva termine per termine usando la regola: $\frac{d}{dx}(ax^n)=anx^{n-1}$ e la derivata di una costante è $0$.</div>
+        <div class="reveal solution">$$y'=x^3+x^2-x.$$<br>Passaggi: $\left(\frac14x^4\right)'=x^3$, $\left(\frac13x^3\right)'=x^2$, $\left(-\frac12x^2\right)'=-x$, $\left(\frac34\right)'=0$.</div>
+        <div class="reveal theory">Per un polinomio si deriva ogni monomio separatamente. È il caso più diretto: non serve prodotto, quoziente o catena.</div>
+      </div>
+
+      <div class="card exercise">
+        <div class="exercise-title"><span class="badge">2</span><strong>$y=(3x+4)(x^2-1)$</strong></div>
+        <div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleBox(this,'solution')">Svolgimento</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div>
+        <div class="reveal hint">Hai un prodotto di due funzioni. Usa $(uv)'=u'v+uv'$.</div>
+        <div class="reveal solution">Poni $u=3x+4$, $v=x^2-1$. Allora $u'=3$, $v'=2x$.<br>$$y'=3(x^2-1)+(3x+4)(2x)=3x^2-3+6x^2+8x=9x^2+8x-3.$$</div>
+        <div class="reveal theory">La regola del prodotto evita errori tipici come derivare “pezzo per pezzo” senza sommare i due contributi.</div>
+      </div>
+
+      <div class="card exercise">
+        <div class="exercise-title"><span class="badge">3</span><strong>$y=\sqrt[3]{x}-1$</strong></div>
+        <div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleBox(this,'solution')">Svolgimento</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div>
+        <div class="reveal hint">Scrivi la radice come potenza: $\sqrt[3]{x}=x^{1/3}$.</div>
+        <div class="reveal solution">$$y'=(x^{1/3})'-0=\frac13x^{-2/3}=\frac{1}{3\sqrt[3]{x^2}}.$$</div>
+        <div class="reveal theory">Le radici si trasformano in potenze frazionarie. Questo rende il calcolo più uniforme.</div>
+      </div>
+
+      <div class="card exercise">
+        <div class="exercise-title"><span class="badge">4</span><strong>$y=3x^2-4x+1-\frac1x$</strong></div>
+        <div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleBox(this,'solution')">Svolgimento</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div>
+        <div class="reveal hint">Ricorda che $\frac1x=x^{-1}$.</div>
+        <div class="reveal solution">$$y'=6x-4+0-(-x^{-2})=6x-4+\frac1{x^2}.$$</div>
+        <div class="reveal theory">Attenzione al segno: $\left(-\frac1x\right)'=-(-\frac1{x^2})=+\frac1{x^2}$.</div>
+      </div>
+
+      <div class="card exercise">
+        <div class="exercise-title"><span class="badge">5</span><strong>$y=\frac{2x-3}{3x-2}$</strong></div>
+        <div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleBox(this,'solution')">Svolgimento</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div>
+        <div class="reveal hint">Usa la regola del quoziente: $\left(\frac uv\right)'=\frac{u'v-uv'}{v^2}$.</div>
+        <div class="reveal solution">$u=2x-3$, $v=3x-2$, $u'=2$, $v'=3$.<br>$$y'=\frac{2(3x-2)-(2x-3)\cdot 3}{(3x-2)^2}=\frac{6x-4-6x+9}{(3x-2)^2}=\frac5{(3x-2)^2}.$$</div>
+        <div class="reveal theory">Nel quoziente il denominatore va tutto al quadrato. Errore comune: dimenticare il meno nel numeratore.</div>
+      </div>
+
+      <div class="card exercise">
+        <div class="exercise-title"><span class="badge">6</span><strong>$y=(x^3+4\sqrt{x})(x^3-2\sqrt{x})$</strong></div>
+        <div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleBox(this,'solution')">Svolgimento</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div>
+        <div class="reveal hint">Qui conviene prima semplificare il prodotto sviluppando i termini.</div>
+        <div class="reveal solution">Sviluppo: $$y=x^6+2x^3\sqrt{x}-8x.$$<br>Derivo: $$y'=6x^5+2\left(3x^2\sqrt{x}+x^3\cdot\frac1{2\sqrt{x}}\right)-8=6x^5+7x^2\sqrt{x}-8.$$</div>
+        <div class="reveal theory">Quando un prodotto contiene radicali, a volte sviluppare prima semplifica molto il lavoro.</div>
+      </div>
+
+      <div class="card exercise">
+        <div class="exercise-title"><span class="badge">7</span><strong>$y=3\sqrt[3]{x}-\frac32\sqrt[3]{x^2}+3$</strong></div>
+        <div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleBox(this,'solution')">Svolgimento</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div>
+        <div class="reveal hint">Scrivi $\sqrt[3]{x}=x^{1/3}$ e $\sqrt[3]{x^2}=x^{2/3}$.</div>
+        <div class="reveal solution">$$y'=3\cdot\frac13x^{-2/3}-\frac32\cdot\frac23x^{-1/3}=\frac1{\sqrt[3]{x^2}}-\frac1{\sqrt[3]{x}}.$$</div>
+        <div class="reveal theory">Per esponenti frazionari la regola di derivazione resta la stessa: $\frac{d}{dx}x^\alpha=\alpha x^{\alpha-1}$.</div>
+      </div>
+
+      <div class="card exercise">
+        <div class="exercise-title"><span class="badge">8</span><strong>$y=\dfrac{x+\sqrt{x}}{\sqrt{x}}$</strong></div>
+        <div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleBox(this,'solution')">Svolgimento</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div>
+        <div class="reveal hint">Prima semplifica il rapporto dividendo ogni termine del numeratore per $\sqrt{x}$.</div>
+        <div class="reveal solution">$$y=\frac{x}{\sqrt{x}}+\frac{\sqrt{x}}{\sqrt{x}}=\sqrt{x}+1.$$ Quindi $$y'=\frac{1}{2\sqrt{x}}=\frac{\sqrt{x}}{2x}.$$</div>
+        <div class="reveal theory">Semplificare prima di derivare spesso riduce i passaggi e gli errori.</div>
+      </div>
+
+      <div class="card exercise">
+        <div class="exercise-title"><span class="badge">9</span><strong>$y=\dfrac{x}{4^x}$</strong></div>
+        <div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleBox(this,'solution')">Svolgimento</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div>
+        <div class="reveal hint">Scrivi $y=x\cdot4^{-x}$ e usa prodotto + catena su $4^{-x}$.</div>
+        <div class="reveal solution">$$y'=1\cdot4^{-x}+x\cdot 4^{-x}(-\ln4)=\frac{1-x\ln4}{4^x}.$$</div>
+        <div class="reveal theory">Per $a^{u(x)}$ vale $\frac{d}{dx}a^{u(x)}=a^{u(x)}\ln(a)\,u'(x)$.</div>
+      </div>
+
+      <div class="card exercise">
+        <div class="exercise-title"><span class="badge">10</span><strong>$y=x\cdot10^x$</strong></div>
+        <div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleBox(this,'solution')">Svolgimento</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div>
+        <div class="reveal hint">Prodotto: deriva $x$ e $10^x$.</div>
+        <div class="reveal solution">$$y'=10^x+x\cdot10^x\ln10=10^x(1+x\ln10).$$</div>
+        <div class="reveal theory">La derivata di $a^x$ non è $a^{x-1}$: è $a^x\ln a$.</div>
+      </div>
+
+      <div class="card exercise">
+        <div class="exercise-title"><span class="badge">11</span><strong>$y=\dfrac{x}{\ln x}$</strong></div>
+        <div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleBox(this,'solution')">Svolgimento</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div>
+        <div class="reveal hint">Usa il quoziente. Ricorda che $(\ln x)'=1/x$.</div>
+        <div class="reveal solution">$$y'=\frac{1\cdot\ln x-x\cdot\frac1x}{(\ln x)^2}=\frac{\ln x-1}{(\ln x)^2}.$$</div>
+        <div class="reveal theory">Con i logaritmi, prima controlla sempre il dominio: qui serve $x&gt;0$ e $\ln x\neq0$.</div>
+      </div>
+
+      <div class="card exercise">
+        <div class="exercise-title"><span class="badge">12</span><strong>$y=\dfrac{\ln x}{x}$</strong></div>
+        <div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleBox(this,'solution')">Svolgimento</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div>
+        <div class="reveal hint">Quoziente oppure prodotto con $x^{-1}$.</div>
+        <div class="reveal solution">$$y'=\frac{\frac1x\cdot x-\ln x}{x^2}=\frac{1-\ln x}{x^2}.$$</div>
+        <div class="reveal theory">Forma equivalente utile: $y=\ln x\cdot x^{-1}$, così puoi usare il prodotto.</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="tab-composte" class="tab">
+    <div class="card"><h2>Tipologia 2 - Derivata di funzione composta</h2><p class="small">La parola chiave è: <strong>catena</strong>. Individua funzione esterna e interna.</p><div class="tab-tools"><button class="btn" onclick="toggleTabTest('tab-composte')">Attiva/disattiva modalità test nella scheda</button><button class="btn secondary" onclick="gradeTabTest('tab-composte')">Correggi la scheda</button></div><div id="score-tab-composte" class="test-score" style="display:none"></div></div>
+    <div class="grid">
+      <div class="card exercise"><div class="exercise-title"><span class="badge">1</span><strong>$y=(2x+1)^2$</strong></div><div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleBox(this,'solution')">Svolgimento</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div><div class="reveal hint">Esterno: quadrato. Interno: $2x+1$.</div><div class="reveal solution">$$y'=2(2x+1)\cdot2=4(2x+1).$$</div><div class="reveal theory">Se $y=[u(x)]^n$, allora $y'=n[u(x)]^{n-1}\cdot u'(x)$.</div></div>
+      <div class="card exercise"><div class="exercise-title"><span class="badge">2</span><strong>$y=\sqrt{x^3+1}$</strong></div><div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleBox(this,'solution')">Svolgimento</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div><div class="reveal hint">Esterno: radice quadrata. Interno: $x^3+1$.</div><div class="reveal solution">$$y'=\frac{1}{2\sqrt{x^3+1}}\cdot3x^2=\frac{3x^2}{2\sqrt{x^3+1}}.$$</div><div class="reveal theory">Per $\sqrt{u(x)}$ vale $\dfrac{u'(x)}{2\sqrt{u(x)}}$.</div></div>
+      <div class="card exercise"><div class="exercise-title"><span class="badge">3</span><strong>$y=e^{2x}$</strong></div><div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleBox(this,'solution')">Svolgimento</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div><div class="reveal hint">La derivata di $e^{u}$ è $e^u\,u'$.</div><div class="reveal solution">$$y'=e^{2x}\cdot2=2e^{2x}.$$</div><div class="reveal theory">L'esponenziale in base $e$ è il più semplice: resta uguale a sé stesso, moltiplicato per la derivata dell'esponente.</div></div>
+      <div class="card exercise"><div class="exercise-title"><span class="badge">4</span><strong>$y=e^{x^2-2}$</strong></div><div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleBox(this,'solution')">Svolgimento</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div><div class="reveal hint">Deriva l'esponente $x^2-2$.</div><div class="reveal solution">$$y'=e^{x^2-2}(2x)=2xe^{x^2-2}.$$</div><div class="reveal theory">Errore frequente: dimenticare il fattore $2x$ che viene dalla funzione interna.</div></div>
+      <div class="card exercise"><div class="exercise-title"><span class="badge">5</span><strong>$y=\ln(5x)$</strong></div><div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleBox(this,'solution')">Svolgimento</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div><div class="reveal hint">Per $\ln(u)$ vale $u'/u$.</div><div class="reveal solution">$$y'=\frac{5}{5x}=\frac1x.$$</div><div class="reveal theory">Anche se $\ln(5x)=\ln5+\ln x$, derivando si ottiene lo stesso risultato.</div></div>
+      <div class="card exercise"><div class="exercise-title"><span class="badge">6</span><strong>$y=(\ln x)^2$</strong></div><div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleBox(this,'solution')">Svolgimento</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div><div class="reveal hint">Esterno: quadrato. Interno: $\ln x$.</div><div class="reveal solution">$$y'=2\ln x\cdot\frac1x=\frac{2\ln x}{x}.$$</div><div class="reveal theory">Quando vedi una funzione “tutta al quadrato”, pensa subito alla catena.</div></div>
+      <div class="card exercise"><div class="exercise-title"><span class="badge">7</span><strong>$y=\sqrt{x^2+5}$</strong></div><div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleBox(this,'solution')">Svolgimento</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div><div class="reveal hint">Radice di un polinomio.</div><div class="reveal solution">$$y'=\frac{2x}{2\sqrt{x^2+5}}=\frac{x}{\sqrt{x^2+5}}.$$</div><div class="reveal theory">Si semplifica spesso il fattore $2$ tra numeratore e denominatore.</div></div>
+      <div class="card exercise"><div class="exercise-title"><span class="badge">8</span><strong>$y=\cos(x^2)$</strong></div><div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleBox(this,'solution')">Svolgimento</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div><div class="reveal hint">La derivata di $\cos u$ è $-\sin u\cdot u'$.</div><div class="reveal solution">$$y'=-\sin(x^2)\cdot2x=-2x\sin(x^2).$$</div><div class="reveal theory">Con seno e coseno composti il segno è un punto delicato: $\cos\to-\sin$, $\sin\to\cos$.</div></div>
+      <div class="card exercise"><div class="exercise-title"><span class="badge">9</span><strong>$y=\ln(x^2+1)$</strong></div><div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleBox(this,'solution')">Svolgimento</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div><div class="reveal hint">Usa $\dfrac{u'}u$.</div><div class="reveal solution">$$y'=\frac{2x}{x^2+1}.$$</div><div class="reveal theory">Questa forma compare spesso nello studio di funzione.</div></div>
+      <div class="card exercise"><div class="exercise-title"><span class="badge">10</span><strong>$y=\sin^2x$</strong></div><div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleBox(this,'solution')">Svolgimento</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div><div class="reveal hint">Leggi la funzione come $(\sin x)^2$.</div><div class="reveal solution">$$y'=2\sin x\cos x.$$</div><div class="reveal theory">Non confondere $\sin^2x$ con $\sin(x^2)$: sono funzioni diverse.</div></div>
+      <div class="card exercise"><div class="exercise-title"><span class="badge">11</span><strong>$y=2^{x^2-3x+1}$</strong></div><div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleBox(this,'solution')">Svolgimento</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div><div class="reveal hint">Per $a^{u(x)}$ compare $\ln a$.</div><div class="reveal solution">$$y'=2^{x^2-3x+1}\ln2\,(2x-3).$$</div><div class="reveal theory">La derivata dell'esponente è $2x-3$, da non dimenticare.</div></div>
+      <div class="card exercise"><div class="exercise-title"><span class="badge">12</span><strong>$y=\sin^2(3x)$</strong></div><div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleBox(this,'solution')">Svolgimento</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div><div class="reveal hint">Qui la catena va applicata due volte: quadrato e poi seno di $3x$.</div><div class="reveal solution">$$y'=2\sin(3x)\cos(3x)\cdot3=6\sin(3x)\cos(3x).$$</div><div class="reveal theory">Le composte annidate richiedono ordine: esterna, poi intermedia, poi interna.</div></div>
+    </div>
+  </section>
+
+  <section id="tab-inverse" class="tab">
+    <div class="card"><h2>Tipologia 3 - Derivate di inverse trigonometriche e derivata della funzione inversa</h2><div class="tab-tools"><button class="btn" onclick="toggleTabTest('tab-inverse')">Attiva/disattiva modalità test nella scheda</button><button class="btn secondary" onclick="gradeTabTest('tab-inverse')">Correggi la scheda</button></div><div id="score-tab-inverse" class="test-score" style="display:none"></div></div>
+    <div class="grid">
+      <div class="card exercise"><div class="exercise-title"><span class="badge">1</span><strong>$f(x)=\arcsin(2x)$</strong></div><div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleBox(this,'solution')">Svolgimento</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div><div class="reveal hint">Per $\arcsin(u)$: $\dfrac{u'}{\sqrt{1-u^2}}$.</div><div class="reveal solution">$$f'(x)=\frac{2}{\sqrt{1-4x^2}}.$$</div><div class="reveal theory">Controlla il dominio: qui serve $|2x|&lt;1$ per la derivata.</div></div>
+      <div class="card exercise"><div class="exercise-title"><span class="badge">2</span><strong>$f(x)=\arccos(\ln x)$</strong></div><div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleBox(this,'solution')">Svolgimento</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div><div class="reveal hint">Per $\arccos(u)$: $-\dfrac{u'}{\sqrt{1-u^2}}$.</div><div class="reveal solution">$$f'(x)=-\frac{\frac1x}{\sqrt{1-(\ln x)^2}}=-\frac{1}{x\sqrt{1-\ln^2x}}.$$</div><div class="reveal theory">Il segno meno è caratteristico di $\arccos$.</div></div>
+      <div class="card exercise"><div class="exercise-title"><span class="badge">3</span><strong>$f(x)=x\arcsin x$</strong></div><div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleBox(this,'solution')">Svolgimento</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div><div class="reveal hint">Prodotto tra $x$ e $\arcsin x$.</div><div class="reveal solution">$$f'(x)=\arcsin x+x\cdot\frac1{\sqrt{1-x^2}}.$$</div><div class="reveal theory">Qui si combinano due regole: prodotto e derivata di funzione inversa goniometrica.</div></div>
+      <div class="card exercise"><div class="exercise-title"><span class="badge">4</span><strong>$f(x)=\arctan\!\left(\frac{1-x}{1+x}\right)$</strong></div><div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleBox(this,'solution')">Svolgimento</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div><div class="reveal hint">Poni $u=\dfrac{1-x}{1+x}$ e usa $(\arctan u)'=\dfrac{u'}{1+u^2}$.</div><div class="reveal solution">$$u'=\frac{-(1+x)-(1-x)}{(1+x)^2}=\frac{-2}{(1+x)^2}.$$ Inoltre $$1+u^2=1+\frac{(1-x)^2}{(1+x)^2}=\frac{(1+x)^2+(1-x)^2}{(1+x)^2}=\frac{2(1+x^2)}{(1+x)^2}.$$ Quindi $$f'(x)=\frac{-2/(1+x)^2}{2(1+x^2)/(1+x)^2}=-\frac1{1+x^2}.$$<br><span class="small">Nell'immagine compare $+\frac1{1+x^2}$, ma il calcolo corretto porta il segno meno.</span></div><div class="reveal theory">Questo esercizio è utile anche per controllare criticamente le soluzioni proposte.</div></div>
+      <div class="card exercise"><div class="exercise-title"><span class="badge">5</span><strong>$f(x)=x^3+e^{2x}$ invertibile; trova $g'(f(0))$ con $g=f^{-1}$</strong></div><div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleBox(this,'solution')">Svolgimento</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div><div class="reveal hint">Usa la formula della derivata dell'inversa: $g'(f(x_0))=\dfrac1{f'(x_0)}$.</div><div class="reveal solution">$f'(x)=3x^2+2e^{2x}$, quindi $f'(0)=2$. Inoltre $f(0)=1$. Allora $$g'(f(0))=g'(1)=\frac1{f'(0)}=\frac12.$$</div><div class="reveal theory">Per giustificare l'invertibilità basta osservare che $f'(x)=3x^2+2e^{2x}&gt;0$ per ogni $x$, quindi $f$ è strettamente crescente.</div></div>
+      <div class="card exercise"><div class="exercise-title"><span class="badge">6</span><strong>$f(x)=x^5+x^3$ invertibile; trova $g'(f(1))$ con $g=f^{-1}$</strong></div><div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleBox(this,'solution')">Svolgimento</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div><div class="reveal hint">Calcola $f'(1)$.</div><div class="reveal solution">$f'(x)=5x^4+3x^2$, dunque $f'(1)=8$. Inoltre $f(1)=2$. Quindi $$g'(f(1))=g'(2)=\frac18.$$</div><div class="reveal theory">Anche qui l'invertibilità si giustifica con $f'(x)=5x^4+3x^2\ge0$ e nulla solo in $x=0$; la funzione è comunque strettamente crescente.</div></div>
+    </div>
+  </section>
+
+  <section id="tab-derivabilita" class="tab">
+    <div class="card"><h2>Tipologia 4 - Continuità e derivabilità in un punto</h2><div class="tab-tools"><button class="btn" onclick="toggleTabTest('tab-derivabilita')">Attiva/disattiva modalità test nella scheda</button><button class="btn secondary" onclick="gradeTabTest('tab-derivabilita')">Correggi la scheda</button></div><div id="score-tab-derivabilita" class="test-score" style="display:none"></div></div>
+    <div class="grid">
+      <div class="card exercise"><div class="exercise-title"><span class="badge">1</span><strong>$y=|\ln x|$ nel punto $x=1$</strong></div><div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleBox(this,'solution')">Svolgimento</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div><div class="reveal hint">Studia il segno di $\ln x$ vicino a $1$.</div><div class="reveal solution">Per $x&lt;1$, $\ln x&lt;0$ quindi $|\ln x|=-\ln x$; per $x&gt;1$, $|\ln x|=\ln x$. La funzione è continua in $1$ perché $|\ln1|=0$. Derivate laterali: sinistra $=-1/x\to -1$, destra $=1/x\to1$. <strong>Conclusione:</strong> continua ma non derivabile, punto angoloso.</div><div class="reveal theory">Un valore assoluto di una funzione che cambia segno in un punto spesso genera un angolo.</div></div>
+      <div class="card exercise"><div class="exercise-title"><span class="badge">2</span><strong>$y=e^{|x|}$ nel punto $x=0$</strong></div><div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleBox(this,'solution')">Svolgimento</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div><div class="reveal hint">Scrivi la funzione a tratti.</div><div class="reveal solution">Per $x&lt;0$, $y=e^{-x}$; per $x\ge0$, $y=e^x$. È continua in $0$ perché entrambi i rami valgono $1$. Derivate laterali: sinistra $-e^{-x}\to -1$, destra $e^x\to1$. <strong>Conclusione:</strong> continua ma non derivabile, punto angoloso.</div><div class="reveal theory">La continuità non basta per la derivabilità: servono derivate laterali uguali.</div></div>
+      <div class="card exercise"><div class="exercise-title"><span class="badge">3</span><strong>$y=|e^x-1|$ nel punto $x=0$</strong></div><div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleBox(this,'solution')">Svolgimento</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div><div class="reveal hint">Studia il segno di $e^x-1$ attorno a $0$.</div><div class="reveal solution">Per $x&lt;0$, $e^x-1&lt;0$ quindi $y=1-e^x$; per $x&gt;0$, $y=e^x-1$. Continua in $0$ ma le derivate laterali valgono rispettivamente $-1$ e $1$. <strong>Conclusione:</strong> continua ma non derivabile, punto angoloso.</div><div class="reveal theory">Molto simile all'esercizio precedente: il problema nasce dal modulo.</div></div>
+      <div class="card exercise"><div class="exercise-title"><span class="badge">4</span><strong>$y=\sqrt{x}$ nel punto $x=0$</strong></div><div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleBox(this,'solution')">Svolgimento</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div><div class="reveal hint">Guarda il rapporto incrementale o la derivata $\frac1{2\sqrt{x}}$ per $x&gt;0$.</div><div class="reveal solution">La funzione è continua in $0$. Per $x&gt;0$, $y'=\frac1{2\sqrt{x}}$, che tende a $+\infty$ per $x\to0^+$. <strong>Conclusione:</strong> continua ma non derivabile, con tangente verticale.</div><div class="reveal theory">Quando la derivata esplode a infinito, non c'è derivabilità ordinaria ma si può avere tangente verticale.</div></div>
+      <div class="card exercise"><div class="exercise-title"><span class="badge">5</span><strong>$y=\dfrac{|x|}{x}$ nel punto $x=0$</strong></div><div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleBox(this,'solution')">Svolgimento</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div><div class="reveal hint">Prima controlla se la funzione è definita.</div><div class="reveal solution">In $x=0$ il denominatore è nullo, quindi la funzione non è definita. <strong>Conclusione:</strong> non si può parlare di continuità o derivabilità nel punto.</div><div class="reveal theory">La derivabilità richiede prima di tutto che la funzione sia definita nel punto.</div></div>
+      <div class="card exercise"><div class="exercise-title"><span class="badge">6</span><strong>$y=|1-x^2|$ nel punto $x=\pm1$</strong></div><div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleBox(this,'solution')">Svolgimento</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div><div class="reveal hint">Il modulo cambia quando $1-x^2=0$.</div><div class="reveal solution">Per $|x|&lt;1$, $y=1-x^2$; per $|x|&gt;1$, $y=x^2-1$. In $x=1$ le derivate laterali sono $-2$ e $2$; in $x=-1$ sono $-2$ e $2$ invertite nei lati. <strong>Conclusione:</strong> continua ma non derivabile in $x=\pm1$, punto angoloso.</div><div class="reveal theory">I punti in cui l'argomento del valore assoluto si annulla sono candidati naturali a punti di non derivabilità.</div></div>
+      <div class="card exercise"><div class="exercise-title"><span class="badge">7</span><strong>$y=\begin{cases}x+1 &amp; x&lt;0\\ e^x &amp; x\ge0\end{cases}$ nel punto $x=0$</strong></div><div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleBox(this,'solution')">Svolgimento</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div><div class="reveal hint">Confronta valore e derivate dei due rami in $0$.</div><div class="reveal solution">Continuità: a sinistra $x+1\to1$, a destra $e^0=1$. Quindi continua. Derivate laterali: sinistra $1$, destra $e^0=1$. <strong>Conclusione:</strong> continua e derivabile in $0$.</div><div class="reveal theory">Per una funzione definita a tratti in un punto di raccordo bisogna verificare: valore, continuità, derivate laterali.</div></div>
+    </div>
+  </section>
+
+  <section id="tab-teoria" class="tab">
+    <div class="card">
+      <h2>Ripasso teorico schematizzato</h2>
+      <div class="legend">
+        <span>1. Riconosci la struttura</span>
+        <span>2. Scegli la regola</span>
+        <span>3. Deriva con ordine</span>
+        <span>4. Semplifica</span>
+      </div>
+      <table>
+        <tr><th>Tipo di funzione</th><th>Formula</th><th>Osservazione</th></tr>
+        <tr><td>Costante</td><td>$c' = 0$</td><td>Una costante non cambia.</td></tr>
+        <tr><td>Potenza</td><td>$(x^n)'=nx^{n-1}$</td><td>Vale anche con esponenti frazionari o negativi.</td></tr>
+        <tr><td>Somma</td><td>$(u+v)'=u'+v'$</td><td>Si deriva termine per termine.</td></tr>
+        <tr><td>Prodotto</td><td>$(uv)'=u'v+uv'$</td><td>Errore tipico: fare $u'v'$.</td></tr>
+        <tr><td>Quoziente</td><td>$\left(\frac uv\right)'=\frac{u'v-uv'}{v^2}$</td><td>Attenzione al segno meno nel numeratore.</td></tr>
+        <tr><td>Catena</td><td>$[f(g(x))]'=f'(g(x))\cdot g'(x)$</td><td>Individua esterna e interna.</td></tr>
+        <tr><td>Esponenziale</td><td>$(e^{u})'=e^u u'$; $(a^u)'=a^u\ln(a)u'$</td><td>Con base diversa da $e$ compare $\ln a$.</td></tr>
+        <tr><td>Logaritmo</td><td>$(\ln u)'=\dfrac{u'}u$</td><td>Controlla sempre il dominio.</td></tr>
+        <tr><td>Seno e coseno</td><td>$(\sin u)'=\cos u\,u'$; $(\cos u)'=-\sin u\,u'$</td><td>Occhio al segno del coseno.</td></tr>
+        <tr><td>Inverse goniometriche</td><td>$(\arcsin u)'=\dfrac{u'}{\sqrt{1-u^2}}$, $(\arccos u)'=-\dfrac{u'}{\sqrt{1-u^2}}$, $(\arctan u)'=\dfrac{u'}{1+u^2}$</td><td>Spesso si combinano con la catena.</td></tr>
+      </table>
+
+      <h3>Schema operativo: come scegliere la regola giusta</h3>
+      <table>
+        <tr><th>Se vedi...</th><th>Pensa a...</th><th>Esempio</th></tr>
+        <tr><td>Una parentesi “tutta elevata”</td><td>Catena</td><td>$(2x+1)^2$</td></tr>
+        <tr><td>Una radice con dentro una funzione</td><td>Catena</td><td>$\sqrt{x^2+5}$</td></tr>
+        <tr><td>Due fattori che si moltiplicano</td><td>Prodotto</td><td>$x\cdot 10^x$</td></tr>
+        <tr><td>Un rapporto</td><td>Quoziente o semplificazione preventiva</td><td>$\dfrac{x}{\ln x}$</td></tr>
+        <tr><td>Un modulo</td><td>Studio a tratti</td><td>$|\ln x|$</td></tr>
+        <tr><td>Funzione definita a tratti</td><td>Continuità e derivate laterali</td><td>$\begin{cases}x+1\\ e^x\end{cases}$</td></tr>
+      </table>
+
+      <h3>Punti di non derivabilità</h3>
+      <table>
+        <tr><th>Tipo</th><th>Segnale</th><th>Esempio</th></tr>
+        <tr><td>Punto angoloso</td><td>Derivate laterali finite ma diverse</td><td>$|x|$ in $0$</td></tr>
+        <tr><td>Cuspide</td><td>Derivate laterali infinite con segni opposti</td><td>$\sqrt[3]{x^2}$ in $0$</td></tr>
+        <tr><td>Tangente verticale</td><td>Derivate laterali infinite con stesso segno</td><td>$\sqrt{x}$ in $0$</td></tr>
+        <tr><td>Discontinuità</td><td>Prima manca la continuità</td><td>$\frac{|x|}{x}$ in $0$</td></tr>
+      </table>
+
+      <h3>Errori più comuni</h3>
+      <div class="pill">Dimenticare la derivata interna</div>
+      <div class="pill">Sbagliare il segno di $\cos$ o $\arccos$</div>
+      <div class="pill">Non controllare il dominio di logaritmi e quozienti</div>
+      <div class="pill">Confondere $\sin^2x$ con $\sin(x^2)$</div>
+      <div class="pill">Studiare il modulo senza spezzare in casi</div>
+    </div>
+  </section>
+
+  <section id="tab-test" class="tab">
+    <div class="card">
+      <h2>Modalità test</h2>
+      <p class="small">Questa scheda genera ogni volta un <strong>test casuale di 15 esercizi</strong> presi dalle 4 tipologie precedenti. Al termine trovi <strong>punteggio, valutazione e consiglio mirato</strong> sugli argomenti da ripassare.</p>
+      <div class="actions">
+        <button class="btn" onclick="generateRandomTest()">Genera nuovo test</button>
+        <button class="btn" onclick="repeatSameTest()">Ripeti questo test</button>
+        <button class="btn" onclick="submitRandomTest()">Correggi test</button>
+      </div>
+      <div id="random-test-meta" class="small"></div>
+      <div id="random-test-container" class="test-box" style="margin-top:16px"></div>
+      <div id="random-test-result" class="score" style="display:none"></div>
+    </div>
+  </section>
+
+  <section id="tab-flash" class="tab">
+    <div class="card flash-panel">
+      <h2>Flashcard per il ripasso</h2>
+      <p class="small">Versione piu giocosa e animata: clicca una carta per girarla, mescola l'ordine oppure riparti dal fronte. Le formule restano in MathJax.</p>
+      <div class="flash-toolbar">
+        <button class="btn" onclick="resetFlashcards()">Riporta tutte sul fronte</button>
+        <button class="btn secondary" onclick="shuffleFlashcards()">Mescola le flashcard</button>
+        <button class="btn secondary" onclick="flipAllFlashcards()">Gira tutte</button>
+        <span class="flash-badge">🎴 40 flashcard teoria completa</span>
+      </div>
+      <div id="flashcards-count" class="small"></div>
+      <div class="flash-wrap" id="flashcards-grid">
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">🧠</div><div class="flash-mini">Regola base</div><div class="flash-question">Che cosa rappresenta la derivata di una funzione in un punto?</div></div><div class="flash-face flash-back"><div class="flash-mini">Risposta</div><div class="flash-answer">Il coefficiente angolare della tangente al grafico nel punto, cioe il limite del rapporto incrementale quando esiste.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">📏</div><div class="flash-mini">Definizione</div><div class="flash-question">Scrivi il rapporto incrementale di $f$ nel punto $x_0$.</div></div><div class="flash-face flash-back"><div class="flash-mini">Formula</div><div class="flash-answer">$\dfrac{f(x_0+h)-f(x_0)}{h}$ con $h\neq 0$.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">⏳</div><div class="flash-mini">Definizione</div><div class="flash-question">Come si definisce $f'(x_0)$ con il limite del rapporto incrementale?</div></div><div class="flash-face flash-back"><div class="flash-mini">Formula</div><div class="flash-answer">$f'(x_0)=\lim_{h	o 0}\dfrac{f(x_0+h)-f(x_0)}{h}$, se il limite esiste ed e finito.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">➕</div><div class="flash-mini">Linearita</div><div class="flash-question">Qual e la derivata di $f(x)+g(x)$?</div></div><div class="flash-face flash-back"><div class="flash-mini">Formula</div><div class="flash-answer">$(f+g)'=f'+g'$.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">🧮</div><div class="flash-mini">Costante</div><div class="flash-question">Qual e la derivata di $k\,f(x)$ con $k$ costante?</div></div><div class="flash-face flash-back"><div class="flash-mini">Formula</div><div class="flash-answer">$(k f)'=k f'$.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">🔢</div><div class="flash-mini">Potenze</div><div class="flash-question">Qual e la derivata di $x^n$?</div></div><div class="flash-face flash-back"><div class="flash-mini">Formula</div><div class="flash-answer">$(x^n)'=n x^{n-1}$ per ogni esponente reale per cui la funzione sia definita.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">1️⃣</div><div class="flash-mini">Base</div><div class="flash-question">Qual e la derivata della funzione costante $c$?</div></div><div class="flash-face flash-back"><div class="flash-mini">Risposta</div><div class="flash-answer">$c'=0$.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">📈</div><div class="flash-mini">Base</div><div class="flash-question">Qual e la derivata di $x$?</div></div><div class="flash-face flash-back"><div class="flash-mini">Risposta</div><div class="flash-answer">$1$.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">✖️</div><div class="flash-mini">Prodotto</div><div class="flash-question">Qual e la formula della derivata del prodotto $u\cdot v$?</div></div><div class="flash-face flash-back"><div class="flash-mini">Formula</div><div class="flash-answer">$(uv)'=u'v+uv'$.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">➗</div><div class="flash-mini">Quoziente</div><div class="flash-question">Qual e la formula della derivata del quoziente $\dfrac{u}{v}$?</div></div><div class="flash-face flash-back"><div class="flash-mini">Formula</div><div class="flash-answer">$\left(\dfrac{u}{v}\right)'=\dfrac{u'v-uv'}{v^2}$ con $v\neq 0$.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">🪆</div><div class="flash-mini">Catena</div><div class="flash-question">Qual e l'idea chiave della derivata di funzione composta?</div></div><div class="flash-face flash-back"><div class="flash-mini">Regola</div><div class="flash-answer">Derivi la funzione esterna valutata nell'interna e moltiplichi per la derivata della funzione interna.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">🔗</div><div class="flash-mini">Catena</div><div class="flash-question">Scrivi la formula di $(f(g(x)))'$.</div></div><div class="flash-face flash-back"><div class="flash-mini">Formula</div><div class="flash-answer">$(f\circ g)'(x)=f'(g(x))\,g'(x)$.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">🌿</div><div class="flash-mini">Radicali</div><div class="flash-question">Come conviene derivare $\sqrt{u(x)}$?</div></div><div class="flash-face flash-back"><div class="flash-mini">Formula</div><div class="flash-answer">Scrivendo $\sqrt{u}=u^{1/2}$: $\left(\sqrt{u}\right)'=\dfrac{u'}{2\sqrt{u}}$.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">🧱</div><div class="flash-mini">Radicali</div><div class="flash-question">Qual e la derivata di $\dfrac{1}{\sqrt{x}}$?</div></div><div class="flash-face flash-back"><div class="flash-mini">Risposta</div><div class="flash-answer">$\left(x^{-1/2}\right)'=-\dfrac{1}{2x^{3/2}}$.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">🧊</div><div class="flash-mini">Radicali</div><div class="flash-question">Qual e la derivata di $\sqrt[3]{x}$?</div></div><div class="flash-face flash-back"><div class="flash-mini">Risposta</div><div class="flash-answer">$\left(x^{1/3}\right)'=\dfrac{1}{3x^{2/3}}$.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">📚</div><div class="flash-mini">Logaritmi</div><div class="flash-question">Qual e la derivata di $\ln x$?</div></div><div class="flash-face flash-back"><div class="flash-mini">Formula</div><div class="flash-answer">$(\ln x)'=\dfrac{1}{x}$ con $x>0$.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">🪄</div><div class="flash-mini">Logaritmi</div><div class="flash-question">Qual e la derivata di $\ln(u)$?</div></div><div class="flash-face flash-back"><div class="flash-mini">Formula</div><div class="flash-answer">$\dfrac{u'}{u}$, con $u>0$.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">🧭</div><div class="flash-mini">Esponenziali</div><div class="flash-question">Qual e la derivata di $e^x$?</div></div><div class="flash-face flash-back"><div class="flash-mini">Risposta</div><div class="flash-answer">$\left(e^x\right)'=e^x$.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">🚀</div><div class="flash-mini">Esponenziali</div><div class="flash-question">Qual e la derivata di $e^{u(x)}$?</div></div><div class="flash-face flash-back"><div class="flash-mini">Formula</div><div class="flash-answer">$\left(e^{u(x)}\right)'=e^{u(x)}u'(x)$.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">🏷️</div><div class="flash-mini">Esponenziali</div><div class="flash-question">Qual e la derivata di $a^x$ con $a>0$ e $a\neq 1$?</div></div><div class="flash-face flash-back"><div class="flash-mini">Formula</div><div class="flash-answer">$(a^x)'=a^x\ln a$.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">🎯</div><div class="flash-mini">Esponenziali</div><div class="flash-question">Qual e la derivata di $a^{u(x)}$?</div></div><div class="flash-face flash-back"><div class="flash-mini">Formula</div><div class="flash-answer">$\left(a^{u(x)}\right)'=a^{u(x)}\ln(a)\,u'(x)$.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">🌊</div><div class="flash-mini">Trigonometria</div><div class="flash-question">Qual e la derivata di $\sin x$?</div></div><div class="flash-face flash-back"><div class="flash-mini">Risposta</div><div class="flash-answer">$(\sin x)'=\cos x$.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">🌙</div><div class="flash-mini">Trigonometria</div><div class="flash-question">Qual e la derivata di $\cos x$?</div></div><div class="flash-face flash-back"><div class="flash-mini">Risposta</div><div class="flash-answer">$(\cos x)'=-\sin x$.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">📐</div><div class="flash-mini">Trigonometria</div><div class="flash-question">Qual e la derivata di $\tan x$?</div></div><div class="flash-face flash-back"><div class="flash-mini">Risposta</div><div class="flash-answer">$(\tan x)'=\dfrac{1}{\cos^2 x}$.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">🌀</div><div class="flash-mini">Inverse trigonometriche</div><div class="flash-question">Qual e la derivata di $\arcsin x$?</div></div><div class="flash-face flash-back"><div class="flash-mini">Formula</div><div class="flash-answer">$(\arcsin x)'=\dfrac{1}{\sqrt{1-x^2}}$ per $|x|<1$.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">🎡</div><div class="flash-mini">Inverse trigonometriche</div><div class="flash-question">Qual e la derivata di $\arccos x$?</div></div><div class="flash-face flash-back"><div class="flash-mini">Formula</div><div class="flash-answer">$(\arccos x)'=-\dfrac{1}{\sqrt{1-x^2}}$ per $|x|<1$.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">🎢</div><div class="flash-mini">Inverse trigonometriche</div><div class="flash-question">Qual e la derivata di $\arctan x$?</div></div><div class="flash-face flash-back"><div class="flash-mini">Formula</div><div class="flash-answer">$(\arctan x)'=\dfrac{1}{1+x^2}$.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">🧩</div><div class="flash-mini">Inverse trigonometriche</div><div class="flash-question">Qual e la derivata di $\arcsin(u)$?</div></div><div class="flash-face flash-back"><div class="flash-mini">Formula</div><div class="flash-answer">$\dfrac{u'}{\sqrt{1-u^2}}$.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">🎠</div><div class="flash-mini">Inverse trigonometriche</div><div class="flash-question">Qual e la derivata di $\arccos(u)$?</div></div><div class="flash-face flash-back"><div class="flash-mini">Formula</div><div class="flash-answer">$-\dfrac{u'}{\sqrt{1-u^2}}$.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">🎪</div><div class="flash-mini">Inverse trigonometriche</div><div class="flash-question">Qual e la derivata di $\arctan(u)$?</div></div><div class="flash-face flash-back"><div class="flash-mini">Formula</div><div class="flash-answer">$\dfrac{u'}{1+u^2}$.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">🔁</div><div class="flash-mini">Funzione inversa</div><div class="flash-question">Qual e la formula della derivata della funzione inversa?</div></div><div class="flash-face flash-back"><div class="flash-mini">Formula</div><div class="flash-answer">Se $y=f(x)$ e $f$ e invertibile con $f'(x_0)\neq 0$, allora $(f^{-1})'(y_0)=\dfrac{1}{f'(x_0)}$ con $y_0=f(x_0)$.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">📍</div><div class="flash-mini">Continuita</div><div class="flash-question">Per essere derivabile in un punto una funzione deve essere continua?</div></div><div class="flash-face flash-back"><div class="flash-mini">Risposta</div><div class="flash-answer">Si. La derivabilita implica la continuita nel punto.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">⚠️</div><div class="flash-mini">Attenzione</div><div class="flash-question">La continuita basta da sola per garantire la derivabilita?</div></div><div class="flash-face flash-back"><div class="flash-mini">Risposta</div><div class="flash-answer">No. Una funzione puo essere continua ma non derivabile, per esempio con un punto angoloso o una cuspide.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">📌</div><div class="flash-mini">Punti speciali</div><div class="flash-question">Quando si ha un punto angoloso?</div></div><div class="flash-face flash-back"><div class="flash-mini">Criterio</div><div class="flash-answer">Quando le derivate laterali esistono, sono finite, ma sono diverse tra loro.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">🌵</div><div class="flash-mini">Punti speciali</div><div class="flash-question">Quando si ha una cuspide?</div></div><div class="flash-face flash-back"><div class="flash-mini">Criterio</div><div class="flash-answer">Quando le derivate laterali tendono a infinito con segni opposti.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">🗼</div><div class="flash-mini">Punti speciali</div><div class="flash-question">Quando si ha una tangente verticale?</div></div><div class="flash-face flash-back"><div class="flash-mini">Criterio</div><div class="flash-answer">Quando la derivata tende a infinito con lo stesso segno dai lati ammessi.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">↔️</div><div class="flash-mini">Laterali</div><div class="flash-question">Che cosa controlli per studiare la derivabilita in un punto critico o di raccordo?</div></div><div class="flash-face flash-back"><div class="flash-mini">Metodo</div><div class="flash-answer">Continuita nel punto e uguaglianza delle derivate laterali.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">🪞</div><div class="flash-mini">Valore assoluto</div><div class="flash-question">Perche $|x|$ non e derivabile in $x=0$?</div></div><div class="flash-face flash-back"><div class="flash-mini">Motivo</div><div class="flash-answer">Perche le derivate laterali valgono $-1$ e $1$, quindi non coincidono.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">🧵</div><div class="flash-mini">Strategia</div><div class="flash-question">Come si affronta una derivata con piu regole insieme?</div></div><div class="flash-face flash-back"><div class="flash-mini">Metodo</div><div class="flash-answer">Si riconosce prima la struttura esterna: somma, prodotto, quoziente, composta; poi si derivano i pezzi interni.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">🧼</div><div class="flash-mini">Semplificazione</div><div class="flash-question">Conviene semplificare sempre prima di derivare?</div></div><div class="flash-face flash-back"><div class="flash-mini">Consiglio</div><div class="flash-answer">Spesso si, se la semplificazione rende la struttura piu chiara. Ma evita passaggi che cambiano il dominio senza accorgertene.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">🚫</div><div class="flash-mini">Errore tipico</div><div class="flash-question">Qual e un errore frequente nella regola del quoziente?</div></div><div class="flash-face flash-back"><div class="flash-mini">Attenzione</div><div class="flash-answer">Dimenticare il quadrato al denominatore oppure sbagliare l'ordine dei termini $u'v-uv'$.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">🧠</div><div class="flash-mini">Errore tipico</div><div class="flash-question">Qual e un errore frequente con la funzione composta?</div></div><div class="flash-face flash-back"><div class="flash-mini">Attenzione</div><div class="flash-answer">Derivare solo la funzione esterna e dimenticare di moltiplicare per la derivata dell'interna.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">🔍</div><div class="flash-mini">Controllo</div><div class="flash-question">Quale verifica rapida puoi fare dopo una derivata?</div></div><div class="flash-face flash-back"><div class="flash-mini">Consiglio</div><div class="flash-answer">Controlla segni, parentesi, dominio e se ogni fattore della composta compare nel risultato finale.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">🧾</div><div class="flash-mini">Promemoria</div><div class="flash-question">Che cosa indica la notazione $\dfrac{dy}{dx}$?</div></div><div class="flash-face flash-back"><div class="flash-mini">Risposta</div><div class="flash-answer">Un modo alternativo per indicare la derivata di $y$ rispetto a $x$.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">🏁</div><div class="flash-mini">Ripasso</div><div class="flash-question">Qual e la sequenza ideale per uno studio completo della derivabilita in un punto?</div></div><div class="flash-face flash-back"><div class="flash-mini">Metodo</div><div class="flash-answer">Prima dominio e continuita, poi valore nel punto, poi derivate laterali e infine classificazione del punto non derivabile, se presente.</div></div></div></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<button class="top-link" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Torna su">↑</button>
+
+
+
+<script>
+  document.querySelectorAll('.tab-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+      document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById(btn.dataset.tab).classList.add('active');
+      window.scrollTo({top:0, behavior:'smooth'});
+    });
+  });
+
+  function toggleBox(button, cls){
+    const card = button.closest('.exercise');
+    const box = card.querySelector('.'+cls);
+    box.classList.toggle('open');
+    if(window.MathJax){ MathJax.typesetPromise([box]); }
+  }
+
+  function normalize(str){
+    return (str || '')
+      .toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+      .replace(/\s+/g,'')
+      .replace(/[{}\[\]]/g,'')
+      .replace(/\\cdot/g,'*')
+      .replace(/·/g,'*')
+      .replace(/−/g,'-')
+      .replace(/\\sqrt/g,'sqrt')
+      .replace(/\\ln/g,'ln')
+      .replace(/\\arcsin/g,'arcsin')
+      .replace(/\\arccos/g,'arccos')
+      .replace(/\\arctan/g,'arctan')
+      .replace(/\\sin/g,'sin')
+      .replace(/\\cos/g,'cos')
+      .replace(/,/g,'.')
+      .replace(/\\/g,'');
+  }
+
+  const TEST_DATA = {
+    'tab-base': [
+      {placeholder:"Scrivi y'", answers:['x^3+x^2-x']},
+      {placeholder:"Scrivi y'", answers:['9x^2+8x-3']},
+      {placeholder:"Scrivi y'", answers:['1/(3sqrt[3](x^2))','(1/3)x^(-2/3)','1/(3cbrt(x^2))']},
+      {placeholder:"Scrivi y'", answers:['6x-4+1/x^2']},
+      {placeholder:"Scrivi y'", answers:['5/(3x-2)^2']},
+      {placeholder:"Scrivi y'", answers:['6x^5+7x^2sqrt(x)-8']},
+      {placeholder:"Scrivi y'", answers:['1/sqrt[3](x^2)-1/sqrt[3](x)','1/cbrt(x^2)-1/cbrt(x)']},
+      {placeholder:"Scrivi y'", answers:['1/(2sqrt(x))','sqrt(x)/(2x)']},
+      {placeholder:"Scrivi y'", answers:['(1-xln4)/4^x']},
+      {placeholder:"Scrivi y'", answers:['10^x(1+xln10)']},
+      {placeholder:"Scrivi y'", answers:['(lnx-1)/(lnx)^2']},
+      {placeholder:"Scrivi y'", answers:['(1-lnx)/x^2']}
+    ],
+    'tab-composte': [
+      {placeholder:"Scrivi y'", answers:['4(2x+1)','8x+4']},
+      {placeholder:"Scrivi y'", answers:['3x^2/(2sqrt(x^3+1))']},
+      {placeholder:"Scrivi y'", answers:['2e^(2x)','2e^2x']},
+      {placeholder:"Scrivi y'", answers:['2xe^(x^2-2)']},
+      {placeholder:"Scrivi y'", answers:['5/x']},
+      {placeholder:"Scrivi y'", answers:['2lnx/x']},
+      {placeholder:"Scrivi y'", answers:['x/sqrt(x^2+5)']},
+      {placeholder:"Scrivi y'", answers:['-2xsin(x^2)']},
+      {placeholder:"Scrivi y'", answers:['2x/(x^2+1)']},
+      {placeholder:"Scrivi y'", answers:['2sinxcosx','sin(2x)']},
+      {placeholder:"Scrivi y'", answers:['(2x-3)2^(x^2-3x+1)ln2']},
+      {placeholder:"Scrivi y'", answers:['6sin(3x)cos(3x)','3sin(6x)']}
+    ],
+    'tab-inverse': [
+      {placeholder:"Scrivi f'(x)", answers:['2/sqrt(1-4x^2)']},
+      {placeholder:"Scrivi f'(x)", answers:['-1/(xsqrt(1-(lnx)^2))']},
+      {placeholder:"Scrivi f'(x)", answers:['arcsinx+x/sqrt(1-x^2)']},
+      {placeholder:"Scrivi f'(x)", answers:['-1/(1+x^2)']},
+      {placeholder:"Scrivi g'(1)", answers:['1/2','0.5']},
+      {placeholder:"Scrivi g'(2)", answers:['1/8','0.125']}
+    ],
+    'tab-derivabilita': [
+      {placeholder:"Classificazione", answers:['continuamanonderivabilepuntoangoloso','continuamanonderivabileangoloso']},
+      {placeholder:"Classificazione", answers:['continuamanonderivabilepuntoangoloso','continuamanonderivabileangoloso']},
+      {placeholder:"Classificazione", answers:['continuamanonderivabilepuntoangoloso','continuamanonderivabileangoloso']},
+      {placeholder:"Classificazione", answers:['continuamanonderivabiletangenteverticale']},
+      {placeholder:"Classificazione", answers:['nondefinita']},
+      {placeholder:"Classificazione", answers:['continuamanonderivabilepuntoangoloso','continuamanonderivabileangoloso']},
+      {placeholder:"Classificazione", answers:['continuaederivabile']}
+    ]
+  };
+
+  function ensureTestAreas(tabId){
+    const section = document.getElementById(tabId);
+    const exercises = section.querySelectorAll('.exercise');
+    const configs = TEST_DATA[tabId] || [];
+    exercises.forEach((ex, idx)=>{
+      if(ex.querySelector('.test-area')) return;
+      const cfg = configs[idx] || {placeholder:'Scrivi la risposta', answers:[]};
+      const area = document.createElement('div');
+      area.className = 'test-area';
+      area.dataset.answers = JSON.stringify(cfg.answers || []);
+      area.innerHTML = '<label><strong>Risposta test</strong></label><input type="text" class="test-input" placeholder="'+cfg.placeholder+'">';
+      ex.appendChild(area);
+    });
+    if(window.MathJax){ MathJax.typesetPromise([section]); }
+  }
+
+  function toggleTabTest(tabId){
+    ensureTestAreas(tabId);
+    const section = document.getElementById(tabId);
+    section.classList.toggle('test-mode');
+    const score = document.getElementById('score-'+tabId);
+    if(score){
+      score.style.display = section.classList.contains('test-mode') ? 'block' : 'none';
+      if(!section.classList.contains('test-mode')) score.innerHTML='';
+    }
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+
+  function gradeTabTest(tabId){
+    ensureTestAreas(tabId);
+    const section = document.getElementById(tabId);
+    const areas = section.querySelectorAll('.test-area');
+    let score = 0;
+    let feedback = '<ol>';
+    areas.forEach((area, idx)=>{
+      const accepted = JSON.parse(area.dataset.answers || '[]').map(normalize);
+      const user = normalize(area.querySelector('input').value);
+      const ok = accepted.includes(user);
+      if(ok) score++;
+      feedback += '<li>'+(ok ? '✅' : '❌')+' Esercizio '+(idx+1)+'</li>';
+    });
+    feedback += '</ol>';
+    const total = areas.length;
+    const perc = total ? Math.round(score/total*100) : 0;
+    const scoreBox = document.getElementById('score-'+tabId);
+    scoreBox.style.display = 'block';
+    scoreBox.innerHTML = '<strong>Punteggio scheda:</strong> '+score+'/'+total+' ('+perc+'%). '+(perc>=75 ? 'Ottimo lavoro.' : perc>=50 ? 'Buona base, ma c\'è ancora qualcosa da ripassare.' : 'Conviene ripassare teoria e svolgimenti guidati prima di riprovare.')+feedback;
+  }
+
+  function correggiTest(){
+    const active = document.querySelector('.tab.active');
+    if(active && TEST_DATA[active.id]) gradeTabTest(active.id);
+  }
+
+  const TAB_LABELS = {
+    'tab-base':'Regole di base e operazioni tra funzioni',
+    'tab-composte':'Funzione composta',
+    'tab-inverse':'Inverse trigonometriche e funzione inversa',
+    'tab-derivabilita':'Continuità e derivabilità'
+  };
+
+  let currentRandomTest = [];
+
+  function getAllRandomizableExercises(){
+    const sourceTabs = ['tab-base','tab-composte','tab-inverse','tab-derivabilita'];
+    const all = [];
+    sourceTabs.forEach(tabId=>{
+      const section = document.getElementById(tabId);
+      const exercises = section.querySelectorAll('.exercise');
+      const configs = TEST_DATA[tabId] || [];
+      exercises.forEach((ex, idx)=>{
+        const titleNode = ex.querySelector('.exercise-title strong');
+        const title = titleNode ? titleNode.innerHTML : 'Esercizio ' + (idx+1);
+        const cfg = configs[idx] || {placeholder:'Scrivi la risposta', answers:[]};
+        all.push({
+          tabId,
+          topic: TAB_LABELS[tabId] || tabId,
+          originalNumber: idx + 1,
+          title,
+          placeholder: cfg.placeholder || 'Scrivi la risposta',
+          answers: cfg.answers || []
+        });
+      });
+    });
+    return all;
+  }
+
+  function shuffleArray(arr){
+    const copy = [...arr];
+    for(let i = copy.length - 1; i > 0; i--){
+      const j = Math.floor(Math.random() * (i + 1));
+      [copy[i], copy[j]] = [copy[j], copy[i]];
+    }
+    return copy;
+  }
+
+  function renderRandomTest(){
+    const box = document.getElementById('random-test-container');
+    const meta = document.getElementById('random-test-meta');
+    const result = document.getElementById('random-test-result');
+    result.style.display = 'none';
+    result.innerHTML = '';
+
+    if(!currentRandomTest.length){
+      box.innerHTML = '<div class="question">Premi <strong>Genera nuovo test</strong> per creare una verifica casuale da 15 esercizi.</div>';
+      meta.innerHTML = '';
+      return;
+    }
+
+    meta.innerHTML = 'Test attuale: <strong>15 esercizi</strong> selezionati casualmente dalle 4 schede.';
+    box.innerHTML = currentRandomTest.map((item, index)=>`
+      <div class="question" data-index="${index}" data-tab="${item.tabId}">
+        <div class="small"><strong>Area:</strong> ${item.topic} · esercizio originale ${item.originalNumber}</div>
+        <div class="formula" style="margin-top:8px"><strong>${index + 1}.</strong> ${item.title}</div>
+        <label for="random-answer-${index}"><strong>Risposta</strong></label>
+        <input id="random-answer-${index}" type="text" class="test-input random-test-input" placeholder="${item.placeholder}">
+      </div>
+    `).join('');
+    if(window.MathJax){ MathJax.typesetPromise([box]); }
+  }
+
+  function generateRandomTest(){
+    const all = getAllRandomizableExercises();
+    currentRandomTest = shuffleArray(all).slice(0, 15);
+    renderRandomTest();
+  }
+
+  function repeatSameTest(){
+    if(!currentRandomTest.length){
+      generateRandomTest();
+      return;
+    }
+    renderRandomTest();
+  }
+
+  function getEvaluationText(perc){
+    if(perc >= 90) return 'Valutazione: eccellente. Hai una padronanza molto solida degli argomenti.';
+    if(perc >= 75) return 'Valutazione: buona. La preparazione è complessivamente sicura.';
+    if(perc >= 60) return `Valutazione: sufficiente. La base c'è, ma serve più precisione.`;
+    return 'Valutazione: da consolidare. Conviene ripassare teoria e svolgimenti guidati prima di riprovare.';
+  }
+
+  function getAdviceFromWeakAreas(topicStats){
+    const weak = Object.entries(topicStats)
+      .filter(([, stat]) => stat.total > 0 && (stat.correct / stat.total) < 0.6)
+      .sort((a,b) => (a[1].correct / a[1].total) - (b[1].correct / b[1].total));
+
+    if(!weak.length){
+      return 'Consiglio: continua così. Per un ripasso completo, ripeti un nuovo test e prova a motivare a voce ogni passaggio.';
+    }
+
+    const topics = weak.map(([name]) => name);
+    if(topics.length === 1){
+      return 'Consiglio: ripassa soprattutto <strong>' + topics[0] + '</strong>, riguardando teoria ed esercizi svolti della scheda corrispondente.';
+    }
+
+    const last = topics.pop();
+    return 'Consiglio: ripassa soprattutto <strong>' + topics.join('</strong>, <strong>') + '</strong> e <strong>' + last + '</strong>, concentrandoti sui passaggi che sbagli più spesso.';
+  }
+
+  function submitRandomTest(){
+    if(!currentRandomTest.length){
+      generateRandomTest();
+      return;
+    }
+
+    const inputs = document.querySelectorAll('#random-test-container .random-test-input');
+    let score = 0;
+    const topicStats = {};
+    let details = '<ol>';
+
+    currentRandomTest.forEach((item, index)=>{
+      const user = normalize(inputs[index].value);
+      const accepted = (item.answers || []).map(normalize);
+      const ok = accepted.includes(user);
+      if(ok) score++;
+      if(!topicStats[item.topic]) topicStats[item.topic] = {correct:0, total:0};
+      topicStats[item.topic].total++;
+      if(ok) topicStats[item.topic].correct++;
+      details += '<li>' + (ok ? '✅' : '❌') + ' ' + item.topic + '</li>';
+    });
+    details += '</ol>';
+
+    const total = currentRandomTest.length;
+    const perc = Math.round(score / total * 100);
+    const result = document.getElementById('random-test-result');
+    result.style.display = 'block';
+    result.innerHTML = `
+      <div><strong>Punteggio finale:</strong> ${score}/${total} (${perc}%)</div>
+      <div style="margin-top:8px">${getEvaluationText(perc)}</div>
+      <div style="margin-top:8px">${getAdviceFromWeakAreas(topicStats)}</div>
+      <div style="margin-top:10px"><strong>Esito sintetico per area:</strong></div>
+      <ul>${Object.entries(topicStats).map(([name, stat])=>`<li>${name}: ${stat.correct}/${stat.total}</li>`).join('')}</ul>
+      <div style="margin-top:10px"><strong>Dettaglio risposte:</strong>${details}</div>
+      <div style="margin-top:10px">Puoi ora scegliere se <strong>ripetere questo test</strong> oppure generare un <strong>nuovo test</strong>.</div>
+    `;
+    result.scrollIntoView({behavior:'smooth', block:'start'});
+  }
+
+  function updateFlashcardCount(){
+    const total = document.querySelectorAll('#flashcards-grid .flashcard').length;
+    const flipped = document.querySelectorAll('#flashcards-grid .flashcard.flipped').length;
+    const el = document.getElementById('flashcards-count');
+    if(el){ el.textContent = `Carte girate: ${flipped} su ${total}`; }
+  }
+
+  function toggleFlashcard(card){
+    card.classList.toggle('flipped');
+    updateFlashcardCount();
+    if(window.MathJax){ MathJax.typesetPromise([card]).catch(()=>{}); }
+  }
+
+  function resetFlashcards(){
+    document.querySelectorAll('#flashcards-grid .flashcard').forEach(c=>c.classList.remove('flipped'));
+    updateFlashcardCount();
+  }
+
+  function flipAllFlashcards(){
+    const cards = [...document.querySelectorAll('#flashcards-grid .flashcard')];
+    const allFlipped = cards.every(c=>c.classList.contains('flipped'));
+    cards.forEach(c=>c.classList.toggle('flipped', !allFlipped));
+    updateFlashcardCount();
+  }
+
+  function shuffleFlashcards(){
+    const grid = document.getElementById('flashcards-grid');
+    const cards = [...grid.children];
+    for(let i = cards.length - 1; i > 0; i--){
+      const j = Math.floor(Math.random() * (i + 1));
+      [cards[i], cards[j]] = [cards[j], cards[i]];
+    }
+    cards.forEach(card=>grid.appendChild(card));
+    resetFlashcards();
+    if(window.MathJax){ MathJax.typesetPromise([grid]).catch(()=>{}); }
+  }
+
+  updateFlashcardCount();
+
+  generateRandomTest();
+</script>
+</body>
+</html>
