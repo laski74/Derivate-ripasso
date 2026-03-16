@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ripasso Derivate - Schede Interattive</title>
+
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\(', '\)']],
+        displayMath: [['$$', '$$'], ['\[', '\]']]
+      },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+  <style>
+    :root{
+      --bg:#f4f7fb;
+      --card:#ffffff;
+      --ink:#1f2d3d;
+      --muted:#5f6f82;
+      --primary:#2f6fab;
+      --primary-2:#e9f2fb;
+      --accent:#dfeaf5;
+      --ok:#dff3e4;
+      --warn:#fff4d6;
+      --shadow:0 10px 24px rgba(27, 49, 72, .10);
+      --radius:18px;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0; font-family:Arial, Helvetica, sans-serif; background:var(--bg); color:var(--ink);
+      line-height:1.5;
+    }
+    header{
+      background:linear-gradient(135deg,#2f6fab,#5ea0d6);
+      color:white; padding:28px 18px 22px;
+      box-shadow:var(--shadow);
+      position:sticky; top:0; z-index:20;
+    }
+    header h1{margin:0 0 8px; font-size:clamp(1.4rem,2.8vw,2.2rem)}
+    header p{margin:0; opacity:.95}
+    .tabs{
+      display:flex; flex-wrap:wrap; gap:8px; margin-top:16px;
+    }
+    .tab-btn{
+      border:none; background:rgba(255,255,255,.18); color:#fff; padding:10px 14px; border-radius:999px;
+      cursor:pointer; font-weight:700; transition:.2s transform,.2s background;
+    }
+    .tab-btn:hover,.tab-btn.active{background:#fff; color:var(--primary); transform:translateY(-1px)}
+    main{max-width:1200px; margin:24px auto; padding:0 16px 40px}
+    .tab{display:none}
+    .tab.active{display:block}
+    .grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(290px,1fr)); gap:16px}
+    .card{
+      background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); padding:18px;
+    }
+    .card h2,.card h3{margin-top:0}
+    .exercise-title{
+      display:flex; align-items:center; gap:10px; margin-bottom:8px;
+      font-size:1.08rem;
+    }
+    .badge{
+      min-width:34px; height:34px; border-radius:10px; display:inline-flex; align-items:center; justify-content:center;
+      background:var(--primary); color:#fff; font-weight:700;
+    }
+    .formula{font-size:1.1rem; margin:.4rem 0 .9rem}
+    .actions{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:10px}
+    .btn{
+      border:none; border-radius:10px; padding:9px 12px; cursor:pointer; font-weight:700;
+      background:var(--primary-2); color:var(--primary);
+    }
+    .btn:hover{filter:brightness(.98)}
+    .reveal{display:none; padding:12px; margin-top:8px; border-radius:12px; background:#f8fbfe; border:1px solid #d8e7f6}
+    .reveal.open{display:block}
+    .hint{background:var(--warn); border-color:#f3ddb0}
+    .theory{background:#eef7ef; border-color:#cfe8d4}
+    .solution{background:#f7f9fc}
+    table{width:100%; border-collapse:collapse; margin:10px 0}
+    th,td{border:1px solid #d9e3ef; padding:10px; vertical-align:top}
+    th{background:#edf4fb}
+    .small{font-size:.95rem; color:var(--muted)}
+    .pill{display:inline-block; padding:6px 10px; border-radius:999px; background:#eef5fb; color:var(--primary); font-weight:700; margin:4px 6px 4px 0}
+    details{background:#f9fbfe; border-radius:12px; padding:10px 12px; margin:10px 0; border:1px solid #dde8f3}
+    details summary{cursor:pointer; font-weight:700}
+    .test-box{display:grid; gap:16px}
+    .question{padding:16px; border:1px solid #d8e4f0; border-radius:14px; background:#fff}
+    input[type="text"], select{
+      width:min(420px,100%); padding:10px 12px; border-radius:10px; border:1px solid #c8d8e8; font-size:1rem;
+    }
+    .score{
+      margin-top:18px; padding:16px; border-radius:14px; background:#eef7ef; border:1px solid #cfe8d4; font-weight:700;
+    }
+    .flash-panel{position:relative; overflow:hidden; background:linear-gradient(135deg,#fff7fb 0%,#f6fbff 55%,#f5fff7 100%)}
+    .flash-panel::before,.flash-panel::after{content:""; position:absolute; border-radius:50%; filter:blur(2px); opacity:.5; pointer-events:none}
+    .flash-panel::before{width:170px; height:170px; background:radial-gradient(circle,#ffd6e7 0%,transparent 70%); top:-55px; right:-35px; animation:floatBlob 8s ease-in-out infinite}
+    .flash-panel::after{width:140px; height:140px; background:radial-gradient(circle,#d9f0ff 0%,transparent 70%); bottom:-40px; left:-30px; animation:floatBlob 10s ease-in-out infinite reverse}
+    .flash-toolbar{display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin:14px 0 6px}
+    .flash-badge{display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:999px; background:#fff; border:1px solid #f4d7e8; box-shadow:0 8px 20px rgba(191,112,151,.12); font-weight:700; color:#8b4a6d}
+    .flash-wrap{display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:18px; margin-top:18px}
+    .flashcard{perspective:1400px; min-height:210px; cursor:pointer; transform:translateY(0); animation:cardFloat 4.8s ease-in-out infinite}
+    .flashcard:nth-child(3n){animation-duration:5.8s}
+    .flashcard:nth-child(4n){animation-duration:6.4s}
+    .flashcard:hover{transform:translateY(-4px) rotate(-1deg)}
+    .flash-inner{position:relative; width:100%; height:100%; min-height:210px; transition:transform .75s cubic-bezier(.2,.75,.25,1); transform-style:preserve-3d}
+    .flashcard.flipped .flash-inner{transform:rotateY(180deg)}
+    .flash-face{position:absolute; inset:0; backface-visibility:hidden; border-radius:24px; box-shadow:0 18px 36px rgba(30,41,59,.14); padding:20px 18px 18px; display:flex; flex-direction:column; justify-content:center; text-align:center; border:1px solid rgba(255,255,255,.65); overflow:hidden}
+    .flash-face::before{content:""; position:absolute; inset:0; background:linear-gradient(135deg,rgba(255,255,255,.78),rgba(255,255,255,.28)); pointer-events:none}
+    .flash-face > *{position:relative; z-index:1}
+    .flash-front{background:linear-gradient(135deg,#fff1f7 0%,#fffef5 100%)}
+    .flash-back{transform:rotateY(180deg); background:linear-gradient(135deg,#eef7ff 0%,#f0fff4 100%); font-weight:600}
+    .flash-mini{font-size:.82rem; text-transform:uppercase; letter-spacing:.08em; color:#8d5976; margin-bottom:10px}
+    .flash-question{font-size:1.05rem; font-weight:800; line-height:1.35; color:#243447}
+    .flash-answer{font-size:1rem; line-height:1.4; color:#203246}
+    .flash-emoji{font-size:1.35rem; margin-bottom:10px}
+    @keyframes cardFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+    @keyframes floatBlob{0%,100%{transform:translateY(0) translateX(0)}50%{transform:translateY(10px) translateX(-8px)}}
+    .top-link{
+      position:fixed; right:18px; bottom:18px; background:var(--primary); color:#fff; border:none; border-radius:999px;
+      width:54px; height:54px; box-shadow:var(--shadow); cursor:pointer; font-size:1.1rem;
+    }
+    .legend{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px}
+    .legend span{background:#fff; padding:8px 10px; border-radius:999px; box-shadow:var(--shadow); font-size:.92rem}
+    @media (max-width:640px){
+      header{position:static}
+      .actions{flex-direction:column}
+      .btn{width:100%}
+    }
+
+    .tab-tools{display:flex; gap:10px; flex-wrap:wrap; margin-top:12px}
+    .test-area{display:none; margin-top:14px; padding-top:12px; border-top:1px dashed var(--border)}
+    .test-mode .test-area{display:block}
+    .test-mode .actions, .test-mode .reveal{display:none}
+    .test-input, .test-select{width:100%; padding:10px 12px; border-radius:12px; border:1px solid var(--border); background:#fff; font-size:1rem}
+    .test-score{margin-top:16px; padding:14px; border-radius:14px; background:#f8fafc; border:1px solid var(--border)}
+
+  
+    .secondary{background:#f3f6fa; color:#526476}
+    .full-span{grid-column:1/-1}
+    .password-box{background:linear-gradient(135deg,#fff8ea,#eef7ff); border:1px solid #e7d8b0}
+    .password-status{margin-top:10px; padding:10px 12px; border-radius:12px; background:#fff; border:1px dashed #d4c08a; font-weight:700}
+    .lock-note{display:inline-flex; align-items:center; gap:8px; padding:6px 10px; border-radius:999px; background:#fff3d8; color:#8a5b00; font-weight:700; margin-bottom:8px}
+    .protected.locked::before{content:"🔒 Svolgimento protetto da password"; display:block; font-weight:700; color:#8a5b00; margin-bottom:8px}
+    .tf-grid{display:grid; grid-template-columns:minmax(0,1fr) 280px; gap:16px; align-items:start}
+    .graph-box img{max-width:280px; width:100%; border-radius:12px; border:1px solid #d8e4f0; background:#fff}
+    code{background:#eef4fb; padding:2px 6px; border-radius:8px}
+    @media (max-width: 760px){
+      .tf-grid{grid-template-columns:1fr}
+      .graph-box{justify-self:center}
+    }
+
+  </style>
+</head>
+<body>
+<header id="top">
+  <h1>Derivate - Ripasso interattivo</h1>
+  <p>Schede per tipologia, svolgimenti guidati, suggerimenti, teoria, modalità test e flashcard.</p>
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="tab-base">Base</button>
+    <button class="tab-btn" data-tab="tab-composte">Composte</button>
+    <button class="tab-btn" data-tab="tab-inverse">Inverse</button>
+    <button class="tab-btn" data-tab="tab-derivabilita">Derivabilità</button>
+    <button class="tab-btn" data-tab="tab-fondamentali">Fai il punto</button>
+    <button class="tab-btn" data-tab="tab-teoria">Teoria</button>
+    <button class="tab-btn" data-tab="tab-test">Modalità test</button>
+    <button class="tab-btn" data-tab="tab-flash">Flashcard</button>
+  </div>
+</header>
+
+<main>
+  <section id="tab-base" class="tab active">
+    <div class="card">
+      <h2>Tipologia 1 - Calcolo di derivate: regole di base e operazioni tra funzioni</h2>
+      <p class="small">Qui trovi potenze, polinomi, prodotti, quozienti, radicali, logaritmi ed esponenziali.</p>
+      <div class="tab-tools"><button class="btn" onclick="toggleTabTest('tab-base')">Attiva/disattiva modalità test nella scheda</button><button class="btn secondary" onclick="gradeTabTest('tab-base')">Correggi la scheda</button></div><div id="score-tab-base" class="test-score" style="display:none"></div>
+    </div>
+    <div class="grid">
+      <div class="card exercise">
+        <div class="exercise-title"><span class="badge">1</span><strong>$y=\frac14 x^4+\frac13 x^3-\frac12 x^2+\frac34$</strong></div>
+        <div class="actions">
+          <button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button>
+          <button class="btn" onclick="toggleBox(this,'solution')">Svolgimento</button>
+          <button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button>
+        </div>
+        <div class="reveal hint">Deriva termine per termine usando la regola: $\frac{d}{dx}(ax^n)=anx^{n-1}$ e la derivata di una costante è $0$.</div>
+        <div class="reveal solution">$$y'=x^3+x^2-x.$$<br>Passaggi: $\left(\frac14x^4\right)'=x^3$, $\left(\frac13x^3\right)'=x^2$, $\left(-\frac12x^2\right)'=-x$, $\left(\frac34\right)'=0$.</div>
+        <div class="reveal theory">Per un polinomio si deriva ogni monomio separatamente. È il caso più diretto: non serve prodotto, quoziente o catena.</div>
+      </div>
+
+      <div class="card exercise">
+        <div class="exercise-title"><span class="badge">2</span><strong>$y=(3x+4)(x^2-1)$</strong></div>
+        <div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleBox(this,'solution')">Svolgimento</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div>
+        <div class="reveal hint">Hai un prodotto di due funzioni. Usa $(uv)'=u'v+uv'$.</div>
+        <div class="reveal solution">Poni $u=3x+4$, $v=x^2-1$. Allora $u'=3$, $v'=2x$.<br>$$y'=3(x^2-1)+(3x+4)(2x)=3x^2-3+6x^2+8x=9x^2+8x-3.$$</div>
+        <div class="reveal theory">La regola del prodotto evita errori tipici come derivare “pezzo per pezzo” senza sommare i due contributi.</div>
+      </div>
+
+      <div class="card exercise">
+        <div class="exercise-title"><span class="badge">3</span><strong>$y=\sqrt[3]{x}-1$</strong></div>
+        <div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleBox(this,'solution')">Svolgimento</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div>
+        <div class="reveal hint">Scrivi la radice come potenza: $\sqrt[3]{x}=x^{1/3}$.</div>
+        <div class="reveal solution">$$y'=(x^{1/3})'-0=\frac13x^{-2/3}=\frac{1}{3\sqrt[3]{x^2}}.$$</div>
+        <div class="reveal theory">Le radici si trasformano in potenze frazionarie. Questo rende il calcolo più uniforme.</div>
+      </div>
+
+      <div class="card exercise">
+        <div class="exercise-title"><span class="badge">4</span><strong>$y=3x^2-4x+1-\frac1x$</strong></div>
+        <div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleBox(this,'solution')">Svolgimento</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div>
+        <div class="reveal hint">Ricorda che $\frac1x=x^{-1}$.</div>
+        <div class="reveal solution">$$y'=6x-4+0-(-x^{-2})=6x-4+\frac1{x^2}.$$</div>
+        <div class="reveal theory">Attenzione al segno: $\left(-\frac1x\right)'=-(-\frac1{x^2})=+\frac1{x^2}$.</div>
+      </div>
+
+      <div class="card exercise">
+        <div class="exercise-title"><span class="badge">5</span><strong>$y=\frac{2x-3}{3x-2}$</strong></div>
+        <div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleBox(this,'solution')">Svolgimento</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div>
+        <div class="reveal hint">Usa la regola del quoziente: $\left(\frac uv\right)'=\frac{u'v-uv'}{v^2}$.</div>
+        <div class="reveal solution">$u=2x-3$, $v=3x-2$, $u'=2$, $v'=3$.<br>$$y'=\frac{2(3x-2)-(2x-3)\cdot 3}{(3x-2)^2}=\frac{6x-4-6x+9}{(3x-2)^2}=\frac5{(3x-2)^2}.$$</div>
+        <div class="reveal theory">Nel quoziente il denominatore va tutto al quadrato. Errore comune: dimenticare il meno nel numeratore.</div>
+      </div>
+
+      <div class="card exercise">
+        <div class="exercise-title"><span class="badge">6</span><strong>$y=(x^3+4\sqrt{x})(x^3-2\sqrt{x})$</strong></div>
+        <div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleBox(this,'solution')">Svolgimento</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div>
+        <div class="reveal hint">Qui conviene prima semplificare il prodotto sviluppando i termini.</div>
+        <div class="reveal solution">Sviluppo: $$y=x^6+2x^3\sqrt{x}-8x.$$<br>Derivo: $$y'=6x^5+2\left(3x^2\sqrt{x}+x^3\cdot\frac1{2\sqrt{x}}\right)-8=6x^5+7x^2\sqrt{x}-8.$$</div>
+        <div class="reveal theory">Quando un prodotto contiene radicali, a volte sviluppare prima semplifica molto il lavoro.</div>
+      </div>
+
+      <div class="card exercise">
+        <div class="exercise-title"><span class="badge">7</span><strong>$y=3\sqrt[3]{x}-\frac32\sqrt[3]{x^2}+3$</strong></div>
+        <div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleBox(this,'solution')">Svolgimento</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div>
+        <div class="reveal hint">Scrivi $\sqrt[3]{x}=x^{1/3}$ e $\sqrt[3]{x^2}=x^{2/3}$.</div>
+        <div class="reveal solution">$$y'=3\cdot\frac13x^{-2/3}-\frac32\cdot\frac23x^{-1/3}=\frac1{\sqrt[3]{x^2}}-\frac1{\sqrt[3]{x}}.$$</div>
+        <div class="reveal theory">Per esponenti frazionari la regola di derivazione resta la stessa: $\frac{d}{dx}x^\alpha=\alpha x^{\alpha-1}$.</div>
+      </div>
+
+      <div class="card exercise">
+        <div class="exercise-title"><span class="badge">8</span><strong>$y=\dfrac{x+\sqrt{x}}{\sqrt{x}}$</strong></div>
+        <div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleBox(this,'solution')">Svolgimento</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div>
+        <div class="reveal hint">Prima semplifica il rapporto dividendo ogni termine del numeratore per $\sqrt{x}$.</div>
+        <div class="reveal solution">$$y=\frac{x}{\sqrt{x}}+\frac{\sqrt{x}}{\sqrt{x}}=\sqrt{x}+1.$$ Quindi $$y'=\frac{1}{2\sqrt{x}}=\frac{\sqrt{x}}{2x}.$$</div>
+        <div class="reveal theory">Semplificare prima di derivare spesso riduce i passaggi e gli errori.</div>
+      </div>
+
+      <div class="card exercise">
+        <div class="exercise-title"><span class="badge">9</span><strong>$y=\dfrac{x}{4^x}$</strong></div>
+        <div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleBox(this,'solution')">Svolgimento</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div>
+        <div class="reveal hint">Scrivi $y=x\cdot4^{-x}$ e usa prodotto + catena su $4^{-x}$.</div>
+        <div class="reveal solution">$$y'=1\cdot4^{-x}+x\cdot 4^{-x}(-\ln4)=\frac{1-x\ln4}{4^x}.$$</div>
+        <div class="reveal theory">Per $a^{u(x)}$ vale $\frac{d}{dx}a^{u(x)}=a^{u(x)}\ln(a)\,u'(x)$.</div>
+      </div>
+
+      <div class="card exercise">
+        <div class="exercise-title"><span class="badge">10</span><strong>$y=x\cdot10^x$</strong></div>
+        <div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleBox(this,'solution')">Svolgimento</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div>
+        <div class="reveal hint">Prodotto: deriva $x$ e $10^x$.</div>
+        <div class="reveal solution">$$y'=10^x+x\cdot10^x\ln10=10^x(1+x\ln10).$$</div>
+        <div class="reveal theory">La derivata di $a^x$ non è $a^{x-1}$: è $a^x\ln a$.</div>
+      </div>
+
+      <div class="card exercise">
+        <div class="exercise-title"><span class="badge">11</span><strong>$y=\dfrac{x}{\ln x}$</strong></div>
+        <div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleBox(this,'solution')">Svolgimento</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div>
+        <div class="reveal hint">Usa il quoziente. Ricorda che $(\ln x)'=1/x$.</div>
+        <div class="reveal solution">$$y'=\frac{1\cdot\ln x-x\cdot\frac1x}{(\ln x)^2}=\frac{\ln x-1}{(\ln x)^2}.$$</div>
+        <div class="reveal theory">Con i logaritmi, prima controlla sempre il dominio: qui serve $x&gt;0$ e $\ln x\neq0$.</div>
+      </div>
+
+      <div class="card exercise">
+        <div class="exercise-title"><span class="badge">12</span><strong>$y=\dfrac{\ln x}{x}$</strong></div>
+        <div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleBox(this,'solution')">Svolgimento</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div>
+        <div class="reveal hint">Quoziente oppure prodotto con $x^{-1}$.</div>
+        <div class="reveal solution">$$y'=\frac{\frac1x\cdot x-\ln x}{x^2}=\frac{1-\ln x}{x^2}.$$</div>
+        <div class="reveal theory">Forma equivalente utile: $y=\ln x\cdot x^{-1}$, così puoi usare il prodotto.</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="tab-composte" class="tab">
+    <div class="card"><h2>Tipologia 2 - Derivata di funzione composta</h2><p class="small">La parola chiave è: <strong>catena</strong>. Individua funzione esterna e interna.</p><div class="tab-tools"><button class="btn" onclick="toggleTabTest('tab-composte')">Attiva/disattiva modalità test nella scheda</button><button class="btn secondary" onclick="gradeTabTest('tab-composte')">Correggi la scheda</button></div><div id="score-tab-composte" class="test-score" style="display:none"></div></div>
+    <div class="grid">
+      <div class="card exercise"><div class="exercise-title"><span class="badge">1</span><strong>$y=(2x+1)^2$</strong></div><div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleBox(this,'solution')">Svolgimento</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div><div class="reveal hint">Esterno: quadrato. Interno: $2x+1$.</div><div class="reveal solution">$$y'=2(2x+1)\cdot2=4(2x+1).$$</div><div class="reveal theory">Se $y=[u(x)]^n$, allora $y'=n[u(x)]^{n-1}\cdot u'(x)$.</div></div>
+      <div class="card exercise"><div class="exercise-title"><span class="badge">2</span><strong>$y=\sqrt{x^3+1}$</strong></div><div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleBox(this,'solution')">Svolgimento</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div><div class="reveal hint">Esterno: radice quadrata. Interno: $x^3+1$.</div><div class="reveal solution">$$y'=\frac{1}{2\sqrt{x^3+1}}\cdot3x^2=\frac{3x^2}{2\sqrt{x^3+1}}.$$</div><div class="reveal theory">Per $\sqrt{u(x)}$ vale $\dfrac{u'(x)}{2\sqrt{u(x)}}$.</div></div>
+      <div class="card exercise"><div class="exercise-title"><span class="badge">3</span><strong>$y=e^{2x}$</strong></div><div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleBox(this,'solution')">Svolgimento</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div><div class="reveal hint">La derivata di $e^{u}$ è $e^u\,u'$.</div><div class="reveal solution">$$y'=e^{2x}\cdot2=2e^{2x}.$$</div><div class="reveal theory">L'esponenziale in base $e$ è il più semplice: resta uguale a sé stesso, moltiplicato per la derivata dell'esponente.</div></div>
+      <div class="card exercise"><div class="exercise-title"><span class="badge">4</span><strong>$y=e^{x^2-2}$</strong></div><div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleBox(this,'solution')">Svolgimento</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div><div class="reveal hint">Deriva l'esponente $x^2-2$.</div><div class="reveal solution">$$y'=e^{x^2-2}(2x)=2xe^{x^2-2}.$$</div><div class="reveal theory">Errore frequente: dimenticare il fattore $2x$ che viene dalla funzione interna.</div></div>
+      <div class="card exercise"><div class="exercise-title"><span class="badge">5</span><strong>$y=\ln(5x)$</strong></div><div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleBox(this,'solution')">Svolgimento</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div><div class="reveal hint">Per $\ln(u)$ vale $u'/u$.</div><div class="reveal solution">$$y'=\frac{5}{5x}=\frac1x.$$</div><div class="reveal theory">Anche se $\ln(5x)=\ln5+\ln x$, derivando si ottiene lo stesso risultato.</div></div>
+      <div class="card exercise"><div class="exercise-title"><span class="badge">6</span><strong>$y=(\ln x)^2$</strong></div><div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleBox(this,'solution')">Svolgimento</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div><div class="reveal hint">Esterno: quadrato. Interno: $\ln x$.</div><div class="reveal solution">$$y'=2\ln x\cdot\frac1x=\frac{2\ln x}{x}.$$</div><div class="reveal theory">Quando vedi una funzione “tutta al quadrato”, pensa subito alla catena.</div></div>
+      <div class="card exercise"><div class="exercise-title"><span class="badge">7</span><strong>$y=\sqrt{x^2+5}$</strong></div><div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleBox(this,'solution')">Svolgimento</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div><div class="reveal hint">Radice di un polinomio.</div><div class="reveal solution">$$y'=\frac{2x}{2\sqrt{x^2+5}}=\frac{x}{\sqrt{x^2+5}}.$$</div><div class="reveal theory">Si semplifica spesso il fattore $2$ tra numeratore e denominatore.</div></div>
+      <div class="card exercise"><div class="exercise-title"><span class="badge">8</span><strong>$y=\cos(x^2)$</strong></div><div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleBox(this,'solution')">Svolgimento</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div><div class="reveal hint">La derivata di $\cos u$ è $-\sin u\cdot u'$.</div><div class="reveal solution">$$y'=-\sin(x^2)\cdot2x=-2x\sin(x^2).$$</div><div class="reveal theory">Con seno e coseno composti il segno è un punto delicato: $\cos\to-\sin$, $\sin\to\cos$.</div></div>
+      <div class="card exercise"><div class="exercise-title"><span class="badge">9</span><strong>$y=\ln(x^2+1)$</strong></div><div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleBox(this,'solution')">Svolgimento</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div><div class="reveal hint">Usa $\dfrac{u'}u$.</div><div class="reveal solution">$$y'=\frac{2x}{x^2+1}.$$</div><div class="reveal theory">Questa forma compare spesso nello studio di funzione.</div></div>
+      <div class="card exercise"><div class="exercise-title"><span class="badge">10</span><strong>$y=\sin^2x$</strong></div><div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleBox(this,'solution')">Svolgimento</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div><div class="reveal hint">Leggi la funzione come $(\sin x)^2$.</div><div class="reveal solution">$$y'=2\sin x\cos x.$$</div><div class="reveal theory">Non confondere $\sin^2x$ con $\sin(x^2)$: sono funzioni diverse.</div></div>
+      <div class="card exercise"><div class="exercise-title"><span class="badge">11</span><strong>$y=2^{x^2-3x+1}$</strong></div><div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleBox(this,'solution')">Svolgimento</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div><div class="reveal hint">Per $a^{u(x)}$ compare $\ln a$.</div><div class="reveal solution">$$y'=2^{x^2-3x+1}\ln2\,(2x-3).$$</div><div class="reveal theory">La derivata dell'esponente è $2x-3$, da non dimenticare.</div></div>
+      <div class="card exercise"><div class="exercise-title"><span class="badge">12</span><strong>$y=\sin^2(3x)$</strong></div><div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleBox(this,'solution')">Svolgimento</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div><div class="reveal hint">Qui la catena va applicata due volte: quadrato e poi seno di $3x$.</div><div class="reveal solution">$$y'=2\sin(3x)\cos(3x)\cdot3=6\sin(3x)\cos(3x).$$</div><div class="reveal theory">Le composte annidate richiedono ordine: esterna, poi intermedia, poi interna.</div></div>
+    </div>
+  </section>
+
+  <section id="tab-inverse" class="tab">
+    <div class="card"><h2>Tipologia 3 - Derivate di inverse trigonometriche e derivata della funzione inversa</h2><div class="tab-tools"><button class="btn" onclick="toggleTabTest('tab-inverse')">Attiva/disattiva modalità test nella scheda</button><button class="btn secondary" onclick="gradeTabTest('tab-inverse')">Correggi la scheda</button></div><div id="score-tab-inverse" class="test-score" style="display:none"></div></div>
+    <div class="grid">
+      <div class="card exercise"><div class="exercise-title"><span class="badge">1</span><strong>$f(x)=\arcsin(2x)$</strong></div><div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleBox(this,'solution')">Svolgimento</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div><div class="reveal hint">Per $\arcsin(u)$: $\dfrac{u'}{\sqrt{1-u^2}}$.</div><div class="reveal solution">$$f'(x)=\frac{2}{\sqrt{1-4x^2}}.$$</div><div class="reveal theory">Controlla il dominio: qui serve $|2x|&lt;1$ per la derivata.</div></div>
+      <div class="card exercise"><div class="exercise-title"><span class="badge">2</span><strong>$f(x)=\arccos(\ln x)$</strong></div><div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleBox(this,'solution')">Svolgimento</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div><div class="reveal hint">Per $\arccos(u)$: $-\dfrac{u'}{\sqrt{1-u^2}}$.</div><div class="reveal solution">$$f'(x)=-\frac{\frac1x}{\sqrt{1-(\ln x)^2}}=-\frac{1}{x\sqrt{1-\ln^2x}}.$$</div><div class="reveal theory">Il segno meno è caratteristico di $\arccos$.</div></div>
+      <div class="card exercise"><div class="exercise-title"><span class="badge">3</span><strong>$f(x)=x\arcsin x$</strong></div><div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleBox(this,'solution')">Svolgimento</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div><div class="reveal hint">Prodotto tra $x$ e $\arcsin x$.</div><div class="reveal solution">$$f'(x)=\arcsin x+x\cdot\frac1{\sqrt{1-x^2}}.$$</div><div class="reveal theory">Qui si combinano due regole: prodotto e derivata di funzione inversa goniometrica.</div></div>
+      <div class="card exercise"><div class="exercise-title"><span class="badge">4</span><strong>$f(x)=\arctan\!\left(\frac{1-x}{1+x}\right)$</strong></div><div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleBox(this,'solution')">Svolgimento</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div><div class="reveal hint">Poni $u=\dfrac{1-x}{1+x}$ e usa $(\arctan u)'=\dfrac{u'}{1+u^2}$.</div><div class="reveal solution">$$u'=\frac{-(1+x)-(1-x)}{(1+x)^2}=\frac{-2}{(1+x)^2}.$$ Inoltre $$1+u^2=1+\frac{(1-x)^2}{(1+x)^2}=\frac{(1+x)^2+(1-x)^2}{(1+x)^2}=\frac{2(1+x^2)}{(1+x)^2}.$$ Quindi $$f'(x)=\frac{-2/(1+x)^2}{2(1+x^2)/(1+x)^2}=-\frac1{1+x^2}.$$<br><span class="small">Nell'immagine compare $+\frac1{1+x^2}$, ma il calcolo corretto porta il segno meno.</span></div><div class="reveal theory">Questo esercizio è utile anche per controllare criticamente le soluzioni proposte.</div></div>
+      <div class="card exercise"><div class="exercise-title"><span class="badge">5</span><strong>$f(x)=x^3+e^{2x}$ invertibile; trova $g'(f(0))$ con $g=f^{-1}$</strong></div><div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleBox(this,'solution')">Svolgimento</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div><div class="reveal hint">Usa la formula della derivata dell'inversa: $g'(f(x_0))=\dfrac1{f'(x_0)}$.</div><div class="reveal solution">$f'(x)=3x^2+2e^{2x}$, quindi $f'(0)=2$. Inoltre $f(0)=1$. Allora $$g'(f(0))=g'(1)=\frac1{f'(0)}=\frac12.$$</div><div class="reveal theory">Per giustificare l'invertibilità basta osservare che $f'(x)=3x^2+2e^{2x}&gt;0$ per ogni $x$, quindi $f$ è strettamente crescente.</div></div>
+      <div class="card exercise"><div class="exercise-title"><span class="badge">6</span><strong>$f(x)=x^5+x^3$ invertibile; trova $g'(f(1))$ con $g=f^{-1}$</strong></div><div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleBox(this,'solution')">Svolgimento</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div><div class="reveal hint">Calcola $f'(1)$.</div><div class="reveal solution">$f'(x)=5x^4+3x^2$, dunque $f'(1)=8$. Inoltre $f(1)=2$. Quindi $$g'(f(1))=g'(2)=\frac18.$$</div><div class="reveal theory">Anche qui l'invertibilità si giustifica con $f'(x)=5x^4+3x^2\ge0$ e nulla solo in $x=0$; la funzione è comunque strettamente crescente.</div></div>
+    </div>
+  </section>
+
+  <section id="tab-derivabilita" class="tab">
+    <div class="card"><h2>Tipologia 4 - Continuità e derivabilità in un punto</h2><div class="tab-tools"><button class="btn" onclick="toggleTabTest('tab-derivabilita')">Attiva/disattiva modalità test nella scheda</button><button class="btn secondary" onclick="gradeTabTest('tab-derivabilita')">Correggi la scheda</button></div><div id="score-tab-derivabilita" class="test-score" style="display:none"></div></div>
+    <div class="grid">
+      <div class="card exercise"><div class="exercise-title"><span class="badge">1</span><strong>$y=|\ln x|$ nel punto $x=1$</strong></div><div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleBox(this,'solution')">Svolgimento</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div><div class="reveal hint">Studia il segno di $\ln x$ vicino a $1$.</div><div class="reveal solution">Per $x&lt;1$, $\ln x&lt;0$ quindi $|\ln x|=-\ln x$; per $x&gt;1$, $|\ln x|=\ln x$. La funzione è continua in $1$ perché $|\ln1|=0$. Derivate laterali: sinistra $=-1/x\to -1$, destra $=1/x\to1$. <strong>Conclusione:</strong> continua ma non derivabile, punto angoloso.</div><div class="reveal theory">Un valore assoluto di una funzione che cambia segno in un punto spesso genera un angolo.</div></div>
+      <div class="card exercise"><div class="exercise-title"><span class="badge">2</span><strong>$y=e^{|x|}$ nel punto $x=0$</strong></div><div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleBox(this,'solution')">Svolgimento</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div><div class="reveal hint">Scrivi la funzione a tratti.</div><div class="reveal solution">Per $x&lt;0$, $y=e^{-x}$; per $x\ge0$, $y=e^x$. È continua in $0$ perché entrambi i rami valgono $1$. Derivate laterali: sinistra $-e^{-x}\to -1$, destra $e^x\to1$. <strong>Conclusione:</strong> continua ma non derivabile, punto angoloso.</div><div class="reveal theory">La continuità non basta per la derivabilità: servono derivate laterali uguali.</div></div>
+      <div class="card exercise"><div class="exercise-title"><span class="badge">3</span><strong>$y=|e^x-1|$ nel punto $x=0$</strong></div><div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleBox(this,'solution')">Svolgimento</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div><div class="reveal hint">Studia il segno di $e^x-1$ attorno a $0$.</div><div class="reveal solution">Per $x&lt;0$, $e^x-1&lt;0$ quindi $y=1-e^x$; per $x&gt;0$, $y=e^x-1$. Continua in $0$ ma le derivate laterali valgono rispettivamente $-1$ e $1$. <strong>Conclusione:</strong> continua ma non derivabile, punto angoloso.</div><div class="reveal theory">Molto simile all'esercizio precedente: il problema nasce dal modulo.</div></div>
+      <div class="card exercise"><div class="exercise-title"><span class="badge">4</span><strong>$y=\sqrt{x}$ nel punto $x=0$</strong></div><div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleBox(this,'solution')">Svolgimento</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div><div class="reveal hint">Guarda il rapporto incrementale o la derivata $\frac1{2\sqrt{x}}$ per $x&gt;0$.</div><div class="reveal solution">La funzione è continua in $0$. Per $x&gt;0$, $y'=\frac1{2\sqrt{x}}$, che tende a $+\infty$ per $x\to0^+$. <strong>Conclusione:</strong> continua ma non derivabile, con tangente verticale.</div><div class="reveal theory">Quando la derivata esplode a infinito, non c'è derivabilità ordinaria ma si può avere tangente verticale.</div></div>
+      <div class="card exercise"><div class="exercise-title"><span class="badge">5</span><strong>$y=\dfrac{|x|}{x}$ nel punto $x=0$</strong></div><div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleBox(this,'solution')">Svolgimento</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div><div class="reveal hint">Prima controlla se la funzione è definita.</div><div class="reveal solution">In $x=0$ il denominatore è nullo, quindi la funzione non è definita. <strong>Conclusione:</strong> non si può parlare di continuità o derivabilità nel punto.</div><div class="reveal theory">La derivabilità richiede prima di tutto che la funzione sia definita nel punto.</div></div>
+      <div class="card exercise"><div class="exercise-title"><span class="badge">6</span><strong>$y=|1-x^2|$ nel punto $x=\pm1$</strong></div><div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleBox(this,'solution')">Svolgimento</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div><div class="reveal hint">Il modulo cambia quando $1-x^2=0$.</div><div class="reveal solution">Per $|x|&lt;1$, $y=1-x^2$; per $|x|&gt;1$, $y=x^2-1$. In $x=1$ le derivate laterali sono $-2$ e $2$; in $x=-1$ sono $-2$ e $2$ invertite nei lati. <strong>Conclusione:</strong> continua ma non derivabile in $x=\pm1$, punto angoloso.</div><div class="reveal theory">I punti in cui l'argomento del valore assoluto si annulla sono candidati naturali a punti di non derivabilità.</div></div>
+      <div class="card exercise"><div class="exercise-title"><span class="badge">7</span><strong>$y=\begin{cases}x+1 &amp; x&lt;0\\ e^x &amp; x\ge0\end{cases}$ nel punto $x=0$</strong></div><div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleBox(this,'solution')">Svolgimento</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div><div class="reveal hint">Confronta valore e derivate dei due rami in $0$.</div><div class="reveal solution">Continuità: a sinistra $x+1\to1$, a destra $e^0=1$. Quindi continua. Derivate laterali: sinistra $1$, destra $e^0=1$. <strong>Conclusione:</strong> continua e derivabile in $0$.</div><div class="reveal theory">Per una funzione definita a tratti in un punto di raccordo bisogna verificare: valore, continuità, derivate laterali.</div></div>
+    </div>
+  </section>
+
+  <section id="tab-fondamentali" class="tab">
+    <div class="card password-box">
+      <h2>Fai il punto sui fondamentali</h2>
+      <p>14 esercizi riepilogativi sui fondamenti delle derivate. <strong>Suggerimento</strong> e <strong>approfondimento teorico</strong> sono sempre apribili. Lo <strong>svolgimento</strong> è protetto da password.</p>
+      <div class="actions">
+        <button class="btn" onclick="unlockFondamentali()">Sblocca svolgimenti</button>
+        <button class="btn secondary" onclick="document.getElementById('password-file-input').click()">Carica file password</button>
+        <input id="password-file-input" type="file" accept=".txt" style="display:none" onchange="handlePasswordFile(event)">
+      </div>
+      <div class="small">Usa il file <code>password_fondamentali.txt</code> nella stessa cartella dell'HTML. Se il browser blocca la lettura automatica del file locale, selezionalo manualmente con il pulsante qui sopra.</div>
+      <div id="password-status" class="password-status">Stato password: non caricata.</div>
+    </div>
+
+    <div class="grid">
+      <div class="card exercise">
+        <div class="exercise-title"><span class="badge">1</span><strong>Rapporto incrementale</strong></div>
+        <div class="formula">Determina il rapporto incrementale della funzione $y=x^2-5x$ nel punto generico $c$ del dominio, per un incremento $h$ generico diverso da $0$.</div>
+        <div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleProtectedSolution(this)">Svolgimento protetto</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div>
+        <div class="reveal hint">Sostituisci $x=c+h$ nella funzione e usa la definizione $\dfrac{f(c+h)-f(c)}{h}$.</div>
+        <div class="reveal solution protected locked"><div class="lock-note">🔐 Contenuto visibile solo dopo lo sblocco</div>$$\frac{f(c+h)-f(c)}{h}=\frac{(c+h)^2-5(c+h)-(c^2-5c)}{h}.$$ Sviluppando: $$\frac{c^2+2ch+h^2-5c-5h-c^2+5c}{h}=\frac{2ch+h^2-5h}{h}.$$ Poiché $h\neq 0$, semplifico: $$\frac{f(c+h)-f(c)}{h}=2c+h-5.$$</div>
+        <div class="reveal theory">Il rapporto incrementale misura la variazione media tra due punti. Facendo tendere $h$ a $0$ ottieni la derivata.</div>
+      </div>
+
+      <div class="card exercise">
+        <div class="exercise-title"><span class="badge">2</span><strong>Funzione derivata con la definizione</strong></div>
+        <div class="formula">Data la funzione $f(x)=x^2-2x+4$, calcola, applicando la definizione, la sua funzione derivata.</div>
+        <div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleProtectedSolution(this)">Svolgimento protetto</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div>
+        <div class="reveal hint">Calcola $f(x+h)$, poi forma il quoziente incrementale e passa al limite per $h\to 0$.</div>
+        <div class="reveal solution protected locked"><div class="lock-note">🔐 Contenuto visibile solo dopo lo sblocco</div>$$f(x+h)=(x+h)^2-2(x+h)+4=x^2+2xh+h^2-2x-2h+4.$$ Quindi $$\frac{f(x+h)-f(x)}{h}=\frac{2xh+h^2-2h}{h}=2x+h-2.$$ Passando al limite per $h\to 0$: $$f'(x)=2x-2.$$</div>
+        <div class="reveal theory">La definizione è la base teorica di tutte le regole di derivazione successive.</div>
+      </div>
+
+      <div class="card exercise"><div class="exercise-title"><span class="badge">3a</span><strong>$y=x^5$</strong></div><div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleProtectedSolution(this)">Svolgimento protetto</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div><div class="reveal hint">Usa la regola della potenza.</div><div class="reveal solution protected locked"><div class="lock-note">🔐 Contenuto visibile solo dopo lo sblocco</div>$$y'=5x^4.$$</div><div class="reveal theory">Per $x^n$ vale $(x^n)'=nx^{n-1}$.</div></div>
+      <div class="card exercise"><div class="exercise-title"><span class="badge">3b</span><strong>$y=\dfrac{1}{x^6}$</strong></div><div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleProtectedSolution(this)">Svolgimento protetto</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div><div class="reveal hint">Riscrivi come potenza negativa: $x^{-6}$.</div><div class="reveal solution protected locked"><div class="lock-note">🔐 Contenuto visibile solo dopo lo sblocco</div>$$y=x^{-6}\Rightarrow y'=-6x^{-7}=-\frac{6}{x^7}.$$</div><div class="reveal theory">Scrivere i quozienti come potenze rende la derivazione più rapida.</div></div>
+      <div class="card exercise"><div class="exercise-title"><span class="badge">3c</span><strong>$y=\sqrt[4]{x^3}$</strong></div><div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleProtectedSolution(this)">Svolgimento protetto</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div><div class="reveal hint">Scrivi la radice come potenza: $x^{3/4}$.</div><div class="reveal solution protected locked"><div class="lock-note">🔐 Contenuto visibile solo dopo lo sblocco</div>$$y=x^{3/4}\Rightarrow y'=\frac{3}{4}x^{-1/4}=\frac{3}{4\sqrt[4]{x}}.$$</div><div class="reveal theory">Anche gli esponenti frazionari seguono la stessa regola generale della potenza.</div></div>
+      <div class="card exercise"><div class="exercise-title"><span class="badge">3d</span><strong>$y=x\sqrt{x}$</strong></div><div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleProtectedSolution(this)">Svolgimento protetto</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div><div class="reveal hint">Conviene scrivere $x\sqrt{x}=x^{3/2}$.</div><div class="reveal solution protected locked"><div class="lock-note">🔐 Contenuto visibile solo dopo lo sblocco</div>$$y=x^{3/2}\Rightarrow y'=\frac{3}{2}x^{1/2}=\frac{3}{2}\sqrt{x}.$$</div><div class="reveal theory">Prima semplificare la scrittura spesso evita un prodotto inutile.</div></div>
+
+      <div class="card exercise"><div class="exercise-title"><span class="badge">4a</span><strong>$y=4x^2$</strong></div><div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleProtectedSolution(this)">Svolgimento protetto</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div><div class="reveal hint">Usa la costante moltiplicativa.</div><div class="reveal solution protected locked"><div class="lock-note">🔐 Contenuto visibile solo dopo lo sblocco</div>$$y'=4\cdot 2x=8x.$$</div><div class="reveal theory">Se $y=kf(x)$, allora $y'=kf'(x)$.</div></div>
+      <div class="card exercise"><div class="exercise-title"><span class="badge">4b</span><strong>$y=4\sin x$</strong></div><div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleProtectedSolution(this)">Svolgimento protetto</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div><div class="reveal hint">La derivata di $\sin x$ è $\cos x$.</div><div class="reveal solution protected locked"><div class="lock-note">🔐 Contenuto visibile solo dopo lo sblocco</div>$$y'=4\cos x.$$</div><div class="reveal theory">Anche con le funzioni goniometriche la costante resta davanti.</div></div>
+      <div class="card exercise"><div class="exercise-title"><span class="badge">4c</span><strong>$y=\dfrac{1}{3}\ln x$</strong></div><div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleProtectedSolution(this)">Svolgimento protetto</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div><div class="reveal hint">Ricorda che $(\ln x)'=1/x$.</div><div class="reveal solution protected locked"><div class="lock-note">🔐 Contenuto visibile solo dopo lo sblocco</div>$$y'=\frac{1}{3}\cdot\frac{1}{x}=\frac{1}{3x}.$$</div><div class="reveal theory">Con i logaritmi controlla sempre il dominio: qui serve $x>0$.</div></div>
+      <div class="card exercise"><div class="exercise-title"><span class="badge">4d</span><strong>$y=3\sqrt[3]{x}$</strong></div><div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleProtectedSolution(this)">Svolgimento protetto</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div><div class="reveal hint">Scrivi $\sqrt[3]{x}=x^{1/3}$.</div><div class="reveal solution protected locked"><div class="lock-note">🔐 Contenuto visibile solo dopo lo sblocco</div>$$y'=3\cdot\frac{1}{3}x^{-2/3}=x^{-2/3}=\frac{1}{\sqrt[3]{x^2}}.$$</div><div class="reveal theory">Il coefficiente $3$ si semplifica con l'esponente $\frac13$.</div></div>
+
+      <div class="card exercise"><div class="exercise-title"><span class="badge">5</span><strong>$y=3x-5x^2+\dfrac{1}{x}$</strong></div><div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleProtectedSolution(this)">Svolgimento protetto</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div><div class="reveal hint">Deriva termine per termine.</div><div class="reveal solution protected locked"><div class="lock-note">🔐 Contenuto visibile solo dopo lo sblocco</div>$$y'=3-10x-\frac{1}{x^2}.$$</div><div class="reveal theory">Attenzione al segno: la derivata di $1/x$ è negativa.</div></div>
+      <div class="card exercise"><div class="exercise-title"><span class="badge">6</span><strong>$y=5e^x-8\cos x$</strong></div><div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleProtectedSolution(this)">Svolgimento protetto</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div><div class="reveal hint">Ricorda: $(e^x)'=e^x$ e $(\cos x)'=-\sin x$.</div><div class="reveal solution protected locked"><div class="lock-note">🔐 Contenuto visibile solo dopo lo sblocco</div>$$y'=5e^x+8\sin x.$$</div><div class="reveal theory">Il doppio meno nel secondo termine produce un più.</div></div>
+      <div class="card exercise"><div class="exercise-title"><span class="badge">7</span><strong>$y=x^5(e^x-2)$</strong></div><div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleProtectedSolution(this)">Svolgimento protetto</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div><div class="reveal hint">È un prodotto: usa $(uv)'=u'v+uv'$.</div><div class="reveal solution protected locked"><div class="lock-note">🔐 Contenuto visibile solo dopo lo sblocco</div>Pongo $u=x^5$, $v=e^x-2$. Allora $u'=5x^4$ e $v'=e^x$. Quindi $$y'=5x^4(e^x-2)+x^5e^x=x^4\big((x+5)e^x-10\big).$$</div><div class="reveal theory">Nel prodotto si deriva una funzione per volta, lasciando l'altra invariata.</div></div>
+      <div class="card exercise"><div class="exercise-title"><span class="badge">8</span><strong>$y=(x^2-7)\ln x$</strong></div><div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleProtectedSolution(this)">Svolgimento protetto</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div><div class="reveal hint">Ancora un prodotto: polinomio per logaritmo.</div><div class="reveal solution protected locked"><div class="lock-note">🔐 Contenuto visibile solo dopo lo sblocco</div>$$y'=2x\ln x+(x^2-7)\cdot\frac{1}{x}=2x\ln x+x-\frac{7}{x}.$$</div><div class="reveal theory">Dopo la derivazione conviene semplificare $(x^2-7)/x$.</div></div>
+      <div class="card exercise"><div class="exercise-title"><span class="badge">9</span><strong>$y=\dfrac{x^4}{3x^2-1}$</strong></div><div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleProtectedSolution(this)">Svolgimento protetto</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div><div class="reveal hint">Usa la regola del quoziente.</div><div class="reveal solution protected locked"><div class="lock-note">🔐 Contenuto visibile solo dopo lo sblocco</div>$$y'=\frac{4x^3(3x^2-1)-x^4(6x)}{(3x^2-1)^2}=\frac{12x^5-4x^3-6x^5}{(3x^2-1)^2}=\frac{2x^3(3x^2-2)}{(3x^2-1)^2}.$$</div><div class="reveal theory">Errore tipico: dimenticare che il denominatore finale va tutto al quadrato.</div></div>
+      <div class="card exercise"><div class="exercise-title"><span class="badge">10</span><strong>$y=\dfrac{\cos x}{x-1}$</strong></div><div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleProtectedSolution(this)">Svolgimento protetto</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div><div class="reveal hint">Serve il quoziente: attenzione al segno di $(\cos x)'$.</div><div class="reveal solution protected locked"><div class="lock-note">🔐 Contenuto visibile solo dopo lo sblocco</div>$$y'=\frac{(-\sin x)(x-1)-\cos x}{(x-1)^2}.$$</div><div class="reveal theory">Lasciare il numeratore non sviluppato va benissimo se è già ordinato.</div></div>
+      <div class="card exercise"><div class="exercise-title"><span class="badge">11</span><strong>$y=e^{x^2-3x}$</strong></div><div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleProtectedSolution(this)">Svolgimento protetto</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div><div class="reveal hint">È una funzione composta: esponenziale di un polinomio.</div><div class="reveal solution protected locked"><div class="lock-note">🔐 Contenuto visibile solo dopo lo sblocco</div>$$y'=(2x-3)e^{x^2-3x}.$$</div><div class="reveal theory">Per $e^{u(x)}$ la derivata è $e^{u(x)}u'(x)$.</div></div>
+      <div class="card exercise"><div class="exercise-title"><span class="badge">12</span><strong>$y=(7x-1)^4$</strong></div><div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleProtectedSolution(this)">Svolgimento protetto</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div><div class="reveal hint">Catena: esterna potenza, interna funzione lineare.</div><div class="reveal solution protected locked"><div class="lock-note">🔐 Contenuto visibile solo dopo lo sblocco</div>$$y'=4(7x-1)^3\cdot 7=28(7x-1)^3.$$</div><div class="reveal theory">Nelle parentesi elevate a potenza la derivata interna non va dimenticata.</div></div>
+      <div class="card exercise"><div class="exercise-title"><span class="badge">13</span><strong>Retta tangente</strong></div><div class="formula">Trova l'equazione della retta tangente alla funzione $f(x)=(3x-1)^2$ nel suo punto di ascissa $1$.</div><div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleProtectedSolution(this)">Svolgimento protetto</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div><div class="reveal hint">Servono il punto di tangenza e il coefficiente angolare $m=f'(1)$.</div><div class="reveal solution protected locked"><div class="lock-note">🔐 Contenuto visibile solo dopo lo sblocco</div>$$f(1)=(3\cdot1-1)^2=4.$$ $$f'(x)=2(3x-1)\cdot 3=18x-6,$$ quindi $$m=f'(1)=12.$$ La retta tangente per $(1,4)$ è $$y-4=12(x-1),$$ cioè $$y=12x-8.$$</div><div class="reveal theory">La tangente in $x_0$ ha equazione $y-f(x_0)=f'(x_0)(x-x_0)$.</div></div>
+      <div class="card exercise full-span"><div class="exercise-title"><span class="badge">14</span><strong>Punti di non derivabilità dal grafico</strong></div><div class="tf-grid"><div><div class="formula">La funzione rappresentata dal grafico in figura ha:</div><ul><li>a. un punto angoloso in $x=7$;</li><li>b. $f'_-(2)=-\infty$ e $f'_+(2)=+\infty$;</li><li>c. una cuspide in $x=3$;</li><li>d. $f'(5)=+\infty$.</li></ul><div class="actions"><button class="btn" onclick="toggleBox(this,'hint')">Suggerimento</button><button class="btn" onclick="toggleProtectedSolution(this)">Svolgimento protetto</button><button class="btn" onclick="toggleBox(this,'theory')">Approfondimento teorico</button></div><div class="reveal hint">Osserva il tipo di tangente nei punti speciali: orizzontale, verticale o con spigolo. Distingui angolo, cuspide e tangente verticale.</div><div class="reveal solution protected locked"><div class="lock-note">🔐 Contenuto visibile solo dopo lo sblocco</div><strong>Risposte:</strong> a) Falso, b) Falso, c) Vero, d) Falso.<br><br><strong>Motivazione:</strong><br>• In $x=7$ il grafico mostra una cuspide, non un punto angoloso.<br>• In $x=2$ l'affermazione sulle derivate laterali non è coerente con il grafico proposto.<br>• In $x=3$ si riconosce una cuspide.<br>• In $x=5$ la tangente è orizzontale, quindi $f'(5)=0$.</div><div class="reveal theory">Punto angoloso = derivate laterali finite e diverse. Cuspide = derivate laterali infinite di segno opposto. Tangente verticale = derivate laterali infinite con lo stesso segno.</div></div><div class="graph-box"><img src="data:image/png;base64,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" alt="Grafico esercizio 14"></div></div></div>
+    </div>
+  </section>
+
+  <section id="tab-teoria" class="tab">
+    <div class="card">
+      <h2>Ripasso teorico schematizzato</h2>
+      <div class="legend">
+        <span>1. Riconosci la struttura</span>
+        <span>2. Scegli la regola</span>
+        <span>3. Deriva con ordine</span>
+        <span>4. Semplifica</span>
+      </div>
+      <table>
+        <tr><th>Tipo di funzione</th><th>Formula</th><th>Osservazione</th></tr>
+        <tr><td>Costante</td><td>$c' = 0$</td><td>Una costante non cambia.</td></tr>
+        <tr><td>Potenza</td><td>$(x^n)'=nx^{n-1}$</td><td>Vale anche con esponenti frazionari o negativi.</td></tr>
+        <tr><td>Somma</td><td>$(u+v)'=u'+v'$</td><td>Si deriva termine per termine.</td></tr>
+        <tr><td>Prodotto</td><td>$(uv)'=u'v+uv'$</td><td>Errore tipico: fare $u'v'$.</td></tr>
+        <tr><td>Quoziente</td><td>$\left(\frac uv\right)'=\frac{u'v-uv'}{v^2}$</td><td>Attenzione al segno meno nel numeratore.</td></tr>
+        <tr><td>Catena</td><td>$[f(g(x))]'=f'(g(x))\cdot g'(x)$</td><td>Individua esterna e interna.</td></tr>
+        <tr><td>Esponenziale</td><td>$(e^{u})'=e^u u'$; $(a^u)'=a^u\ln(a)u'$</td><td>Con base diversa da $e$ compare $\ln a$.</td></tr>
+        <tr><td>Logaritmo</td><td>$(\ln u)'=\dfrac{u'}u$</td><td>Controlla sempre il dominio.</td></tr>
+        <tr><td>Seno e coseno</td><td>$(\sin u)'=\cos u\,u'$; $(\cos u)'=-\sin u\,u'$</td><td>Occhio al segno del coseno.</td></tr>
+        <tr><td>Inverse goniometriche</td><td>$(\arcsin u)'=\dfrac{u'}{\sqrt{1-u^2}}$, $(\arccos u)'=-\dfrac{u'}{\sqrt{1-u^2}}$, $(\arctan u)'=\dfrac{u'}{1+u^2}$</td><td>Spesso si combinano con la catena.</td></tr>
+      </table>
+
+      <h3>Schema operativo: come scegliere la regola giusta</h3>
+      <table>
+        <tr><th>Se vedi...</th><th>Pensa a...</th><th>Esempio</th></tr>
+        <tr><td>Una parentesi “tutta elevata”</td><td>Catena</td><td>$(2x+1)^2$</td></tr>
+        <tr><td>Una radice con dentro una funzione</td><td>Catena</td><td>$\sqrt{x^2+5}$</td></tr>
+        <tr><td>Due fattori che si moltiplicano</td><td>Prodotto</td><td>$x\cdot 10^x$</td></tr>
+        <tr><td>Un rapporto</td><td>Quoziente o semplificazione preventiva</td><td>$\dfrac{x}{\ln x}$</td></tr>
+        <tr><td>Un modulo</td><td>Studio a tratti</td><td>$|\ln x|$</td></tr>
+        <tr><td>Funzione definita a tratti</td><td>Continuità e derivate laterali</td><td>$\begin{cases}x+1\\ e^x\end{cases}$</td></tr>
+      </table>
+
+      <h3>Punti di non derivabilità</h3>
+      <table>
+        <tr><th>Tipo</th><th>Segnale</th><th>Esempio</th></tr>
+        <tr><td>Punto angoloso</td><td>Derivate laterali finite ma diverse</td><td>$|x|$ in $0$</td></tr>
+        <tr><td>Cuspide</td><td>Derivate laterali infinite con segni opposti</td><td>$\sqrt[3]{x^2}$ in $0$</td></tr>
+        <tr><td>Tangente verticale</td><td>Derivate laterali infinite con stesso segno</td><td>$\sqrt{x}$ in $0$</td></tr>
+        <tr><td>Discontinuità</td><td>Prima manca la continuità</td><td>$\frac{|x|}{x}$ in $0$</td></tr>
+      </table>
+
+      <h3>Errori più comuni</h3>
+      <div class="pill">Dimenticare la derivata interna</div>
+      <div class="pill">Sbagliare il segno di $\cos$ o $\arccos$</div>
+      <div class="pill">Non controllare il dominio di logaritmi e quozienti</div>
+      <div class="pill">Confondere $\sin^2x$ con $\sin(x^2)$</div>
+      <div class="pill">Studiare il modulo senza spezzare in casi</div>
+    </div>
+  </section>
+
+  <section id="tab-test" class="tab">
+    <div class="card">
+      <h2>Modalità test</h2>
+      <p class="small">Questa scheda genera ogni volta un <strong>test casuale di 15 esercizi</strong> presi dalle 4 tipologie precedenti. Al termine trovi <strong>punteggio, valutazione e consiglio mirato</strong> sugli argomenti da ripassare.</p>
+      <div class="actions">
+        <button class="btn" onclick="generateRandomTest()">Genera nuovo test</button>
+        <button class="btn" onclick="repeatSameTest()">Ripeti questo test</button>
+        <button class="btn" onclick="submitRandomTest()">Correggi test</button>
+      </div>
+      <div id="random-test-meta" class="small"></div>
+      <div id="random-test-container" class="test-box" style="margin-top:16px"></div>
+      <div id="random-test-result" class="score" style="display:none"></div>
+    </div>
+  </section>
+
+  <section id="tab-flash" class="tab">
+    <div class="card flash-panel">
+      <h2>Flashcard per il ripasso</h2>
+      <p class="small">Versione piu giocosa e animata: clicca una carta per girarla, mescola l'ordine oppure riparti dal fronte. Le formule restano in MathJax.</p>
+      <div class="flash-toolbar">
+        <button class="btn" onclick="resetFlashcards()">Riporta tutte sul fronte</button>
+        <button class="btn secondary" onclick="shuffleFlashcards()">Mescola le flashcard</button>
+        <button class="btn secondary" onclick="flipAllFlashcards()">Gira tutte</button>
+        <span class="flash-badge">🎴 40 flashcard teoria completa</span>
+      </div>
+      <div id="flashcards-count" class="small"></div>
+      <div class="flash-wrap" id="flashcards-grid">
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">🧠</div><div class="flash-mini">Regola base</div><div class="flash-question">Che cosa rappresenta la derivata di una funzione in un punto?</div></div><div class="flash-face flash-back"><div class="flash-mini">Risposta</div><div class="flash-answer">Il coefficiente angolare della tangente al grafico nel punto, cioe il limite del rapporto incrementale quando esiste.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">📏</div><div class="flash-mini">Definizione</div><div class="flash-question">Scrivi il rapporto incrementale di $f$ nel punto $x_0$.</div></div><div class="flash-face flash-back"><div class="flash-mini">Formula</div><div class="flash-answer">$\dfrac{f(x_0+h)-f(x_0)}{h}$ con $h\neq 0$.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">⏳</div><div class="flash-mini">Definizione</div><div class="flash-question">Come si definisce $f'(x_0)$ con il limite del rapporto incrementale?</div></div><div class="flash-face flash-back"><div class="flash-mini">Formula</div><div class="flash-answer">$f'(x_0)=\lim_{h	o 0}\dfrac{f(x_0+h)-f(x_0)}{h}$, se il limite esiste ed e finito.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">➕</div><div class="flash-mini">Linearita</div><div class="flash-question">Qual e la derivata di $f(x)+g(x)$?</div></div><div class="flash-face flash-back"><div class="flash-mini">Formula</div><div class="flash-answer">$(f+g)'=f'+g'$.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">🧮</div><div class="flash-mini">Costante</div><div class="flash-question">Qual e la derivata di $k\,f(x)$ con $k$ costante?</div></div><div class="flash-face flash-back"><div class="flash-mini">Formula</div><div class="flash-answer">$(k f)'=k f'$.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">🔢</div><div class="flash-mini">Potenze</div><div class="flash-question">Qual e la derivata di $x^n$?</div></div><div class="flash-face flash-back"><div class="flash-mini">Formula</div><div class="flash-answer">$(x^n)'=n x^{n-1}$ per ogni esponente reale per cui la funzione sia definita.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">1️⃣</div><div class="flash-mini">Base</div><div class="flash-question">Qual e la derivata della funzione costante $c$?</div></div><div class="flash-face flash-back"><div class="flash-mini">Risposta</div><div class="flash-answer">$c'=0$.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">📈</div><div class="flash-mini">Base</div><div class="flash-question">Qual e la derivata di $x$?</div></div><div class="flash-face flash-back"><div class="flash-mini">Risposta</div><div class="flash-answer">$1$.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">✖️</div><div class="flash-mini">Prodotto</div><div class="flash-question">Qual e la formula della derivata del prodotto $u\cdot v$?</div></div><div class="flash-face flash-back"><div class="flash-mini">Formula</div><div class="flash-answer">$(uv)'=u'v+uv'$.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">➗</div><div class="flash-mini">Quoziente</div><div class="flash-question">Qual e la formula della derivata del quoziente $\dfrac{u}{v}$?</div></div><div class="flash-face flash-back"><div class="flash-mini">Formula</div><div class="flash-answer">$\left(\dfrac{u}{v}\right)'=\dfrac{u'v-uv'}{v^2}$ con $v\neq 0$.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">🪆</div><div class="flash-mini">Catena</div><div class="flash-question">Qual e l'idea chiave della derivata di funzione composta?</div></div><div class="flash-face flash-back"><div class="flash-mini">Regola</div><div class="flash-answer">Derivi la funzione esterna valutata nell'interna e moltiplichi per la derivata della funzione interna.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">🔗</div><div class="flash-mini">Catena</div><div class="flash-question">Scrivi la formula di $(f(g(x)))'$.</div></div><div class="flash-face flash-back"><div class="flash-mini">Formula</div><div class="flash-answer">$(f\circ g)'(x)=f'(g(x))\,g'(x)$.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">🌿</div><div class="flash-mini">Radicali</div><div class="flash-question">Come conviene derivare $\sqrt{u(x)}$?</div></div><div class="flash-face flash-back"><div class="flash-mini">Formula</div><div class="flash-answer">Scrivendo $\sqrt{u}=u^{1/2}$: $\left(\sqrt{u}\right)'=\dfrac{u'}{2\sqrt{u}}$.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">🧱</div><div class="flash-mini">Radicali</div><div class="flash-question">Qual e la derivata di $\dfrac{1}{\sqrt{x}}$?</div></div><div class="flash-face flash-back"><div class="flash-mini">Risposta</div><div class="flash-answer">$\left(x^{-1/2}\right)'=-\dfrac{1}{2x^{3/2}}$.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">🧊</div><div class="flash-mini">Radicali</div><div class="flash-question">Qual e la derivata di $\sqrt[3]{x}$?</div></div><div class="flash-face flash-back"><div class="flash-mini">Risposta</div><div class="flash-answer">$\left(x^{1/3}\right)'=\dfrac{1}{3x^{2/3}}$.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">📚</div><div class="flash-mini">Logaritmi</div><div class="flash-question">Qual e la derivata di $\ln x$?</div></div><div class="flash-face flash-back"><div class="flash-mini">Formula</div><div class="flash-answer">$(\ln x)'=\dfrac{1}{x}$ con $x>0$.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">🪄</div><div class="flash-mini">Logaritmi</div><div class="flash-question">Qual e la derivata di $\ln(u)$?</div></div><div class="flash-face flash-back"><div class="flash-mini">Formula</div><div class="flash-answer">$\dfrac{u'}{u}$, con $u>0$.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">🧭</div><div class="flash-mini">Esponenziali</div><div class="flash-question">Qual e la derivata di $e^x$?</div></div><div class="flash-face flash-back"><div class="flash-mini">Risposta</div><div class="flash-answer">$\left(e^x\right)'=e^x$.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">🚀</div><div class="flash-mini">Esponenziali</div><div class="flash-question">Qual e la derivata di $e^{u(x)}$?</div></div><div class="flash-face flash-back"><div class="flash-mini">Formula</div><div class="flash-answer">$\left(e^{u(x)}\right)'=e^{u(x)}u'(x)$.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">🏷️</div><div class="flash-mini">Esponenziali</div><div class="flash-question">Qual e la derivata di $a^x$ con $a>0$ e $a\neq 1$?</div></div><div class="flash-face flash-back"><div class="flash-mini">Formula</div><div class="flash-answer">$(a^x)'=a^x\ln a$.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">🎯</div><div class="flash-mini">Esponenziali</div><div class="flash-question">Qual e la derivata di $a^{u(x)}$?</div></div><div class="flash-face flash-back"><div class="flash-mini">Formula</div><div class="flash-answer">$\left(a^{u(x)}\right)'=a^{u(x)}\ln(a)\,u'(x)$.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">🌊</div><div class="flash-mini">Trigonometria</div><div class="flash-question">Qual e la derivata di $\sin x$?</div></div><div class="flash-face flash-back"><div class="flash-mini">Risposta</div><div class="flash-answer">$(\sin x)'=\cos x$.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">🌙</div><div class="flash-mini">Trigonometria</div><div class="flash-question">Qual e la derivata di $\cos x$?</div></div><div class="flash-face flash-back"><div class="flash-mini">Risposta</div><div class="flash-answer">$(\cos x)'=-\sin x$.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">📐</div><div class="flash-mini">Trigonometria</div><div class="flash-question">Qual e la derivata di $\tan x$?</div></div><div class="flash-face flash-back"><div class="flash-mini">Risposta</div><div class="flash-answer">$(\tan x)'=\dfrac{1}{\cos^2 x}$.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">🌀</div><div class="flash-mini">Inverse trigonometriche</div><div class="flash-question">Qual e la derivata di $\arcsin x$?</div></div><div class="flash-face flash-back"><div class="flash-mini">Formula</div><div class="flash-answer">$(\arcsin x)'=\dfrac{1}{\sqrt{1-x^2}}$ per $|x|<1$.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">🎡</div><div class="flash-mini">Inverse trigonometriche</div><div class="flash-question">Qual e la derivata di $\arccos x$?</div></div><div class="flash-face flash-back"><div class="flash-mini">Formula</div><div class="flash-answer">$(\arccos x)'=-\dfrac{1}{\sqrt{1-x^2}}$ per $|x|<1$.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">🎢</div><div class="flash-mini">Inverse trigonometriche</div><div class="flash-question">Qual e la derivata di $\arctan x$?</div></div><div class="flash-face flash-back"><div class="flash-mini">Formula</div><div class="flash-answer">$(\arctan x)'=\dfrac{1}{1+x^2}$.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">🧩</div><div class="flash-mini">Inverse trigonometriche</div><div class="flash-question">Qual e la derivata di $\arcsin(u)$?</div></div><div class="flash-face flash-back"><div class="flash-mini">Formula</div><div class="flash-answer">$\dfrac{u'}{\sqrt{1-u^2}}$.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">🎠</div><div class="flash-mini">Inverse trigonometriche</div><div class="flash-question">Qual e la derivata di $\arccos(u)$?</div></div><div class="flash-face flash-back"><div class="flash-mini">Formula</div><div class="flash-answer">$-\dfrac{u'}{\sqrt{1-u^2}}$.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">🎪</div><div class="flash-mini">Inverse trigonometriche</div><div class="flash-question">Qual e la derivata di $\arctan(u)$?</div></div><div class="flash-face flash-back"><div class="flash-mini">Formula</div><div class="flash-answer">$\dfrac{u'}{1+u^2}$.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">🔁</div><div class="flash-mini">Funzione inversa</div><div class="flash-question">Qual e la formula della derivata della funzione inversa?</div></div><div class="flash-face flash-back"><div class="flash-mini">Formula</div><div class="flash-answer">Se $y=f(x)$ e $f$ e invertibile con $f'(x_0)\neq 0$, allora $(f^{-1})'(y_0)=\dfrac{1}{f'(x_0)}$ con $y_0=f(x_0)$.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">📍</div><div class="flash-mini">Continuita</div><div class="flash-question">Per essere derivabile in un punto una funzione deve essere continua?</div></div><div class="flash-face flash-back"><div class="flash-mini">Risposta</div><div class="flash-answer">Si. La derivabilita implica la continuita nel punto.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">⚠️</div><div class="flash-mini">Attenzione</div><div class="flash-question">La continuita basta da sola per garantire la derivabilita?</div></div><div class="flash-face flash-back"><div class="flash-mini">Risposta</div><div class="flash-answer">No. Una funzione puo essere continua ma non derivabile, per esempio con un punto angoloso o una cuspide.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">📌</div><div class="flash-mini">Punti speciali</div><div class="flash-question">Quando si ha un punto angoloso?</div></div><div class="flash-face flash-back"><div class="flash-mini">Criterio</div><div class="flash-answer">Quando le derivate laterali esistono, sono finite, ma sono diverse tra loro.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">🌵</div><div class="flash-mini">Punti speciali</div><div class="flash-question">Quando si ha una cuspide?</div></div><div class="flash-face flash-back"><div class="flash-mini">Criterio</div><div class="flash-answer">Quando le derivate laterali tendono a infinito con segni opposti.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">🗼</div><div class="flash-mini">Punti speciali</div><div class="flash-question">Quando si ha una tangente verticale?</div></div><div class="flash-face flash-back"><div class="flash-mini">Criterio</div><div class="flash-answer">Quando la derivata tende a infinito con lo stesso segno dai lati ammessi.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">↔️</div><div class="flash-mini">Laterali</div><div class="flash-question">Che cosa controlli per studiare la derivabilita in un punto critico o di raccordo?</div></div><div class="flash-face flash-back"><div class="flash-mini">Metodo</div><div class="flash-answer">Continuita nel punto e uguaglianza delle derivate laterali.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">🪞</div><div class="flash-mini">Valore assoluto</div><div class="flash-question">Perche $|x|$ non e derivabile in $x=0$?</div></div><div class="flash-face flash-back"><div class="flash-mini">Motivo</div><div class="flash-answer">Perche le derivate laterali valgono $-1$ e $1$, quindi non coincidono.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">🧵</div><div class="flash-mini">Strategia</div><div class="flash-question">Come si affronta una derivata con piu regole insieme?</div></div><div class="flash-face flash-back"><div class="flash-mini">Metodo</div><div class="flash-answer">Si riconosce prima la struttura esterna: somma, prodotto, quoziente, composta; poi si derivano i pezzi interni.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">🧼</div><div class="flash-mini">Semplificazione</div><div class="flash-question">Conviene semplificare sempre prima di derivare?</div></div><div class="flash-face flash-back"><div class="flash-mini">Consiglio</div><div class="flash-answer">Spesso si, se la semplificazione rende la struttura piu chiara. Ma evita passaggi che cambiano il dominio senza accorgertene.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">🚫</div><div class="flash-mini">Errore tipico</div><div class="flash-question">Qual e un errore frequente nella regola del quoziente?</div></div><div class="flash-face flash-back"><div class="flash-mini">Attenzione</div><div class="flash-answer">Dimenticare il quadrato al denominatore oppure sbagliare l'ordine dei termini $u'v-uv'$.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">🧠</div><div class="flash-mini">Errore tipico</div><div class="flash-question">Qual e un errore frequente con la funzione composta?</div></div><div class="flash-face flash-back"><div class="flash-mini">Attenzione</div><div class="flash-answer">Derivare solo la funzione esterna e dimenticare di moltiplicare per la derivata dell'interna.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">🔍</div><div class="flash-mini">Controllo</div><div class="flash-question">Quale verifica rapida puoi fare dopo una derivata?</div></div><div class="flash-face flash-back"><div class="flash-mini">Consiglio</div><div class="flash-answer">Controlla segni, parentesi, dominio e se ogni fattore della composta compare nel risultato finale.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">🧾</div><div class="flash-mini">Promemoria</div><div class="flash-question">Che cosa indica la notazione $\dfrac{dy}{dx}$?</div></div><div class="flash-face flash-back"><div class="flash-mini">Risposta</div><div class="flash-answer">Un modo alternativo per indicare la derivata di $y$ rispetto a $x$.</div></div></div></div>
+        <div class="flashcard" onclick="toggleFlashcard(this)"><div class="flash-inner"><div class="flash-face flash-front"><div class="flash-emoji">🏁</div><div class="flash-mini">Ripasso</div><div class="flash-question">Qual e la sequenza ideale per uno studio completo della derivabilita in un punto?</div></div><div class="flash-face flash-back"><div class="flash-mini">Metodo</div><div class="flash-answer">Prima dominio e continuita, poi valore nel punto, poi derivate laterali e infine classificazione del punto non derivabile, se presente.</div></div></div></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<button class="top-link" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Torna su">↑</button>
+
+
+
+<script>
+  document.querySelectorAll('.tab-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+      document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById(btn.dataset.tab).classList.add('active');
+      window.scrollTo({top:0, behavior:'smooth'});
+    });
+  });
+
+  function toggleBox(button, cls){
+    const card = button.closest('.exercise');
+    const box = card.querySelector('.'+cls);
+    box.classList.toggle('open');
+    if(window.MathJax){ MathJax.typesetPromise([box]); }
+  }
+
+  function normalize(str){
+    return (str || '')
+      .toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+      .replace(/\s+/g,'')
+      .replace(/[{}\[\]]/g,'')
+      .replace(/\\cdot/g,'*')
+      .replace(/·/g,'*')
+      .replace(/−/g,'-')
+      .replace(/\\sqrt/g,'sqrt')
+      .replace(/\\ln/g,'ln')
+      .replace(/\\arcsin/g,'arcsin')
+      .replace(/\\arccos/g,'arccos')
+      .replace(/\\arctan/g,'arctan')
+      .replace(/\\sin/g,'sin')
+      .replace(/\\cos/g,'cos')
+      .replace(/,/g,'.')
+      .replace(/\\/g,'');
+  }
+
+  const TEST_DATA = {
+    'tab-base': [
+      {placeholder:"Scrivi y'", answers:['x^3+x^2-x']},
+      {placeholder:"Scrivi y'", answers:['9x^2+8x-3']},
+      {placeholder:"Scrivi y'", answers:['1/(3sqrt[3](x^2))','(1/3)x^(-2/3)','1/(3cbrt(x^2))']},
+      {placeholder:"Scrivi y'", answers:['6x-4+1/x^2']},
+      {placeholder:"Scrivi y'", answers:['5/(3x-2)^2']},
+      {placeholder:"Scrivi y'", answers:['6x^5+7x^2sqrt(x)-8']},
+      {placeholder:"Scrivi y'", answers:['1/sqrt[3](x^2)-1/sqrt[3](x)','1/cbrt(x^2)-1/cbrt(x)']},
+      {placeholder:"Scrivi y'", answers:['1/(2sqrt(x))','sqrt(x)/(2x)']},
+      {placeholder:"Scrivi y'", answers:['(1-xln4)/4^x']},
+      {placeholder:"Scrivi y'", answers:['10^x(1+xln10)']},
+      {placeholder:"Scrivi y'", answers:['(lnx-1)/(lnx)^2']},
+      {placeholder:"Scrivi y'", answers:['(1-lnx)/x^2']}
+    ],
+    'tab-composte': [
+      {placeholder:"Scrivi y'", answers:['4(2x+1)','8x+4']},
+      {placeholder:"Scrivi y'", answers:['3x^2/(2sqrt(x^3+1))']},
+      {placeholder:"Scrivi y'", answers:['2e^(2x)','2e^2x']},
+      {placeholder:"Scrivi y'", answers:['2xe^(x^2-2)']},
+      {placeholder:"Scrivi y'", answers:['5/x']},
+      {placeholder:"Scrivi y'", answers:['2lnx/x']},
+      {placeholder:"Scrivi y'", answers:['x/sqrt(x^2+5)']},
+      {placeholder:"Scrivi y'", answers:['-2xsin(x^2)']},
+      {placeholder:"Scrivi y'", answers:['2x/(x^2+1)']},
+      {placeholder:"Scrivi y'", answers:['2sinxcosx','sin(2x)']},
+      {placeholder:"Scrivi y'", answers:['(2x-3)2^(x^2-3x+1)ln2']},
+      {placeholder:"Scrivi y'", answers:['6sin(3x)cos(3x)','3sin(6x)']}
+    ],
+    'tab-inverse': [
+      {placeholder:"Scrivi f'(x)", answers:['2/sqrt(1-4x^2)']},
+      {placeholder:"Scrivi f'(x)", answers:['-1/(xsqrt(1-(lnx)^2))']},
+      {placeholder:"Scrivi f'(x)", answers:['arcsinx+x/sqrt(1-x^2)']},
+      {placeholder:"Scrivi f'(x)", answers:['-1/(1+x^2)']},
+      {placeholder:"Scrivi g'(1)", answers:['1/2','0.5']},
+      {placeholder:"Scrivi g'(2)", answers:['1/8','0.125']}
+    ],
+    'tab-derivabilita': [
+      {placeholder:"Classificazione", answers:['continuamanonderivabilepuntoangoloso','continuamanonderivabileangoloso']},
+      {placeholder:"Classificazione", answers:['continuamanonderivabilepuntoangoloso','continuamanonderivabileangoloso']},
+      {placeholder:"Classificazione", answers:['continuamanonderivabilepuntoangoloso','continuamanonderivabileangoloso']},
+      {placeholder:"Classificazione", answers:['continuamanonderivabiletangenteverticale']},
+      {placeholder:"Classificazione", answers:['nondefinita']},
+      {placeholder:"Classificazione", answers:['continuamanonderivabilepuntoangoloso','continuamanonderivabileangoloso']},
+      {placeholder:"Classificazione", answers:['continuaederivabile']}
+    ]
+  };
+
+  function ensureTestAreas(tabId){
+    const section = document.getElementById(tabId);
+    const exercises = section.querySelectorAll('.exercise');
+    const configs = TEST_DATA[tabId] || [];
+    exercises.forEach((ex, idx)=>{
+      if(ex.querySelector('.test-area')) return;
+      const cfg = configs[idx] || {placeholder:'Scrivi la risposta', answers:[]};
+      const area = document.createElement('div');
+      area.className = 'test-area';
+      area.dataset.answers = JSON.stringify(cfg.answers || []);
+      area.innerHTML = '<label><strong>Risposta test</strong></label><input type="text" class="test-input" placeholder="'+cfg.placeholder+'">';
+      ex.appendChild(area);
+    });
+    if(window.MathJax){ MathJax.typesetPromise([section]); }
+  }
+
+  function toggleTabTest(tabId){
+    ensureTestAreas(tabId);
+    const section = document.getElementById(tabId);
+    section.classList.toggle('test-mode');
+    const score = document.getElementById('score-'+tabId);
+    if(score){
+      score.style.display = section.classList.contains('test-mode') ? 'block' : 'none';
+      if(!section.classList.contains('test-mode')) score.innerHTML='';
+    }
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+
+  function gradeTabTest(tabId){
+    ensureTestAreas(tabId);
+    const section = document.getElementById(tabId);
+    const areas = section.querySelectorAll('.test-area');
+    let score = 0;
+    let feedback = '<ol>';
+    areas.forEach((area, idx)=>{
+      const accepted = JSON.parse(area.dataset.answers || '[]').map(normalize);
+      const user = normalize(area.querySelector('input').value);
+      const ok = accepted.includes(user);
+      if(ok) score++;
+      feedback += '<li>'+(ok ? '✅' : '❌')+' Esercizio '+(idx+1)+'</li>';
+    });
+    feedback += '</ol>';
+    const total = areas.length;
+    const perc = total ? Math.round(score/total*100) : 0;
+    const scoreBox = document.getElementById('score-'+tabId);
+    scoreBox.style.display = 'block';
+    scoreBox.innerHTML = '<strong>Punteggio scheda:</strong> '+score+'/'+total+' ('+perc+'%). '+(perc>=75 ? 'Ottimo lavoro.' : perc>=50 ? 'Buona base, ma c\'è ancora qualcosa da ripassare.' : 'Conviene ripassare teoria e svolgimenti guidati prima di riprovare.')+feedback;
+  }
+
+  function correggiTest(){
+    const active = document.querySelector('.tab.active');
+    if(active && TEST_DATA[active.id]) gradeTabTest(active.id);
+  }
+
+  const TAB_LABELS = {
+    'tab-base':'Regole di base e operazioni tra funzioni',
+    'tab-composte':'Funzione composta',
+    'tab-inverse':'Inverse trigonometriche e funzione inversa',
+    'tab-derivabilita':'Continuità e derivabilità'
+  };
+
+  let currentRandomTest = [];
+
+  function getAllRandomizableExercises(){
+    const sourceTabs = ['tab-base','tab-composte','tab-inverse','tab-derivabilita'];
+    const all = [];
+    sourceTabs.forEach(tabId=>{
+      const section = document.getElementById(tabId);
+      const exercises = section.querySelectorAll('.exercise');
+      const configs = TEST_DATA[tabId] || [];
+      exercises.forEach((ex, idx)=>{
+        const titleNode = ex.querySelector('.exercise-title strong');
+        const title = titleNode ? titleNode.innerHTML : 'Esercizio ' + (idx+1);
+        const cfg = configs[idx] || {placeholder:'Scrivi la risposta', answers:[]};
+        all.push({
+          tabId,
+          topic: TAB_LABELS[tabId] || tabId,
+          originalNumber: idx + 1,
+          title,
+          placeholder: cfg.placeholder || 'Scrivi la risposta',
+          answers: cfg.answers || []
+        });
+      });
+    });
+    return all;
+  }
+
+  function shuffleArray(arr){
+    const copy = [...arr];
+    for(let i = copy.length - 1; i > 0; i--){
+      const j = Math.floor(Math.random() * (i + 1));
+      [copy[i], copy[j]] = [copy[j], copy[i]];
+    }
+    return copy;
+  }
+
+  function renderRandomTest(){
+    const box = document.getElementById('random-test-container');
+    const meta = document.getElementById('random-test-meta');
+    const result = document.getElementById('random-test-result');
+    result.style.display = 'none';
+    result.innerHTML = '';
+
+    if(!currentRandomTest.length){
+      box.innerHTML = '<div class="question">Premi <strong>Genera nuovo test</strong> per creare una verifica casuale da 15 esercizi.</div>';
+      meta.innerHTML = '';
+      return;
+    }
+
+    meta.innerHTML = 'Test attuale: <strong>15 esercizi</strong> selezionati casualmente dalle 4 schede.';
+    box.innerHTML = currentRandomTest.map((item, index)=>`
+      <div class="question" data-index="${index}" data-tab="${item.tabId}">
+        <div class="small"><strong>Area:</strong> ${item.topic} · esercizio originale ${item.originalNumber}</div>
+        <div class="formula" style="margin-top:8px"><strong>${index + 1}.</strong> ${item.title}</div>
+        <label for="random-answer-${index}"><strong>Risposta</strong></label>
+        <input id="random-answer-${index}" type="text" class="test-input random-test-input" placeholder="${item.placeholder}">
+      </div>
+    `).join('');
+    if(window.MathJax){ MathJax.typesetPromise([box]); }
+  }
+
+  function generateRandomTest(){
+    const all = getAllRandomizableExercises();
+    currentRandomTest = shuffleArray(all).slice(0, 15);
+    renderRandomTest();
+  }
+
+  function repeatSameTest(){
+    if(!currentRandomTest.length){
+      generateRandomTest();
+      return;
+    }
+    renderRandomTest();
+  }
+
+  function getEvaluationText(perc){
+    if(perc >= 90) return 'Valutazione: eccellente. Hai una padronanza molto solida degli argomenti.';
+    if(perc >= 75) return 'Valutazione: buona. La preparazione è complessivamente sicura.';
+    if(perc >= 60) return `Valutazione: sufficiente. La base c'è, ma serve più precisione.`;
+    return 'Valutazione: da consolidare. Conviene ripassare teoria e svolgimenti guidati prima di riprovare.';
+  }
+
+  function getAdviceFromWeakAreas(topicStats){
+    const weak = Object.entries(topicStats)
+      .filter(([, stat]) => stat.total > 0 && (stat.correct / stat.total) < 0.6)
+      .sort((a,b) => (a[1].correct / a[1].total) - (b[1].correct / b[1].total));
+
+    if(!weak.length){
+      return 'Consiglio: continua così. Per un ripasso completo, ripeti un nuovo test e prova a motivare a voce ogni passaggio.';
+    }
+
+    const topics = weak.map(([name]) => name);
+    if(topics.length === 1){
+      return 'Consiglio: ripassa soprattutto <strong>' + topics[0] + '</strong>, riguardando teoria ed esercizi svolti della scheda corrispondente.';
+    }
+
+    const last = topics.pop();
+    return 'Consiglio: ripassa soprattutto <strong>' + topics.join('</strong>, <strong>') + '</strong> e <strong>' + last + '</strong>, concentrandoti sui passaggi che sbagli più spesso.';
+  }
+
+  function submitRandomTest(){
+    if(!currentRandomTest.length){
+      generateRandomTest();
+      return;
+    }
+
+    const inputs = document.querySelectorAll('#random-test-container .random-test-input');
+    let score = 0;
+    const topicStats = {};
+    let details = '<ol>';
+
+    currentRandomTest.forEach((item, index)=>{
+      const user = normalize(inputs[index].value);
+      const accepted = (item.answers || []).map(normalize);
+      const ok = accepted.includes(user);
+      if(ok) score++;
+      if(!topicStats[item.topic]) topicStats[item.topic] = {correct:0, total:0};
+      topicStats[item.topic].total++;
+      if(ok) topicStats[item.topic].correct++;
+      details += '<li>' + (ok ? '✅' : '❌') + ' ' + item.topic + '</li>';
+    });
+    details += '</ol>';
+
+    const total = currentRandomTest.length;
+    const perc = Math.round(score / total * 100);
+    const result = document.getElementById('random-test-result');
+    result.style.display = 'block';
+    result.innerHTML = `
+      <div><strong>Punteggio finale:</strong> ${score}/${total} (${perc}%)</div>
+      <div style="margin-top:8px">${getEvaluationText(perc)}</div>
+      <div style="margin-top:8px">${getAdviceFromWeakAreas(topicStats)}</div>
+      <div style="margin-top:10px"><strong>Esito sintetico per area:</strong></div>
+      <ul>${Object.entries(topicStats).map(([name, stat])=>`<li>${name}: ${stat.correct}/${stat.total}</li>`).join('')}</ul>
+      <div style="margin-top:10px"><strong>Dettaglio risposte:</strong>${details}</div>
+      <div style="margin-top:10px">Puoi ora scegliere se <strong>ripetere questo test</strong> oppure generare un <strong>nuovo test</strong>.</div>
+    `;
+    result.scrollIntoView({behavior:'smooth', block:'start'});
+  }
+
+  function updateFlashcardCount(){
+    const total = document.querySelectorAll('#flashcards-grid .flashcard').length;
+    const flipped = document.querySelectorAll('#flashcards-grid .flashcard.flipped').length;
+    const el = document.getElementById('flashcards-count');
+    if(el){ el.textContent = `Carte girate: ${flipped} su ${total}`; }
+  }
+
+  function toggleFlashcard(card){
+    card.classList.toggle('flipped');
+    updateFlashcardCount();
+    if(window.MathJax){ MathJax.typesetPromise([card]).catch(()=>{}); }
+  }
+
+  function resetFlashcards(){
+    document.querySelectorAll('#flashcards-grid .flashcard').forEach(c=>c.classList.remove('flipped'));
+    updateFlashcardCount();
+  }
+
+  function flipAllFlashcards(){
+    const cards = [...document.querySelectorAll('#flashcards-grid .flashcard')];
+    const allFlipped = cards.every(c=>c.classList.contains('flipped'));
+    cards.forEach(c=>c.classList.toggle('flipped', !allFlipped));
+    updateFlashcardCount();
+  }
+
+  function shuffleFlashcards(){
+    const grid = document.getElementById('flashcards-grid');
+    const cards = [...grid.children];
+    for(let i = cards.length - 1; i > 0; i--){
+      const j = Math.floor(Math.random() * (i + 1));
+      [cards[i], cards[j]] = [cards[j], cards[i]];
+    }
+    cards.forEach(card=>grid.appendChild(card));
+    resetFlashcards();
+    if(window.MathJax){ MathJax.typesetPromise([grid]).catch(()=>{}); }
+  }
+
+  updateFlashcardCount();
+
+  let fondamentaliPassword = null;
+  let fondamentaliUnlocked = false;
+
+  function updatePasswordStatus(message, ok=false){
+    const box = document.getElementById('password-status');
+    if(!box) return;
+    box.textContent = message;
+    box.style.background = ok ? '#eef7ef' : '#fff';
+    box.style.borderColor = ok ? '#bfdcbc' : '#d4c08a';
+  }
+
+  async function autoLoadFondamentaliPassword(){
+    if(fondamentaliPassword) return true;
+    try{
+      const res = await fetch('password_fondamentali.txt?ts=' + Date.now());
+      if(!res.ok) throw new Error('file non trovato');
+      const txt = (await res.text()).trim();
+      if(!txt) throw new Error('file vuoto');
+      fondamentaliPassword = txt;
+      updatePasswordStatus('Password caricata automaticamente dal file password_fondamentali.txt.', true);
+      return true;
+    }catch(err){
+      updatePasswordStatus('Lettura automatica non riuscita. Seleziona manualmente il file password_fondamentali.txt.');
+      return false;
+    }
+  }
+
+  function handlePasswordFile(event){
+    const file = event.target.files && event.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = function(){
+      fondamentaliPassword = String(reader.result || '').trim();
+      if(fondamentaliPassword){
+        updatePasswordStatus('Password caricata dal file selezionato.', true);
+      }else{
+        updatePasswordStatus('Il file password è vuoto.');
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  async function unlockFondamentali(){
+    if(!fondamentaliPassword){
+      await autoLoadFondamentaliPassword();
+    }
+    if(!fondamentaliPassword){
+      alert('Non riesco a leggere la password in automatico. Usa “Carica file password” e seleziona password_fondamentali.txt.');
+      return false;
+    }
+    const entered = prompt('Inserisci la password per sbloccare gli svolgimenti');
+    if(entered === null) return false;
+    if(String(entered).trim() === fondamentaliPassword){
+      fondamentaliUnlocked = true;
+      document.querySelectorAll('#tab-fondamentali .protected').forEach(box=>box.classList.remove('locked'));
+      updatePasswordStatus('Svolgimenti sbloccati correttamente.', true);
+      return true;
+    }
+    updatePasswordStatus('Password errata. Riprova.');
+    alert('Password non corretta.');
+    return false;
+  }
+
+  async function toggleProtectedSolution(button){
+    const card = button.closest('.exercise');
+    const box = card.querySelector('.solution.protected');
+    if(!fondamentaliUnlocked){
+      const ok = await unlockFondamentali();
+      if(!ok) return;
+    }
+    box.classList.toggle('open');
+    if(window.MathJax){ MathJax.typesetPromise([box]).catch(()=>{}); }
+  }
+
+  autoLoadFondamentaliPassword();
+  generateRandomTest();
+</script>
+</body>
+</html>
